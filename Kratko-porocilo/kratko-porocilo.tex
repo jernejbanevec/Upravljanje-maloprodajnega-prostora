@@ -77,4 +77,36 @@ Definirajmo:
 \item $ s_i $: končna efektivna stopnja povpraševanja po $i$-tem izdelku; $s_i = y_i (d_i + \sum_{j \ne i} w_{ij} d_j (1-y_j)) = \sum_j  w_{ij} d_j x_{ij}.$
 \end{itemize} 
 \end{itemize}
+
+
+Pri problemu bomo predpostavili neodvisno polnjenje polic, torej da  ima vsak izdelek svoj strošek polnjenja. Lahko bi uporabili tudi strategijo kombiniranega polnjenja polic, pri kateri dodamo še strošek polnjenja izdelka iz določene skupine. Bolj natančno, če dopolnimo zalogo vsaj enega izdelka iz skupine, plačamo še ta dodaten strošek.
+
+
+Najosnovnejši problem je neomejen problem neodvisnega polnjenja polic. Naš cilj je maksimizacija dobička:
+
+$$  \max_{y, Q,  s, x}  \sum_{i \in \mathcal{P}} ( v_i s_ i - h_i (\frac{Q_i }{ 2} + \theta_i Q_i) - \frac{k_i s_i}{Q_i})   $$ 
+p.p.
+
+ $ s_i = \sum_j w_{ij} d_j x_{ij}, \forall i$,
+
+$ x_{ij} \leq y_i, \forall i, j  $,
+
+$ x_{ij} \leq 1 - y_j, \forall i \ne j$,
+
+$ y_i \in \{0,1\}$,
+
+$ x_{ij} \geq 0, \forall i,j$,
+
+$Q_i \geq 0, \forall i$.
+
+\vspace*{4 mm}
+Maksimiziramo torej neto dobiček (celoten dobiček zmanjšan za stroške hranjenja izdelka na polici in polnjenja izdelka), kjer prvi pogoj definira končno efektivno stopnjo povpraševanja, drugi in tretji pogoj definirata $x$ s pomočjo $y$, ostali pogoji pa določijo definicijsko območje $y$, $Q$ in $x$.
+
+ 
+\section{Načrt dela}
+
+V projektu se bova osredotočila na primerjavo opisanih strategij in kdaj je uporaba določene strategije primernejša. V nadaljnjem bova neomejen model nadgradila z omejenim, pri katerem uvedemo še dodatna parametra, ki določata ves skupni prostor v trgovini in porabo prostora posameznega izdelka. Zaradi računske težavnosti problema bova predstavila metode, ki olajšajo reševanje. Generirala bova naključne podatke in primerjala obe strategiji polnjenja polic v različnih okoliščinah. Delo bo potekalo v programskem jeziku Matlab.
+
+
+	
 \end{document}
