@@ -29,7 +29,6 @@ Maloprodajne trgovine imajo veliko izbiro izdelkov, ki jih lahko vključijo v sv
 
 Pri analizi problema se bova osredotočila na trgovine, ki imajo v svojo ponudbo vključene izdelke z dolgo življenjsko dobo in stabilnim povpraševanjem. 
 
-Med trgovci sta se oblikovali dve strategiji za razporeditev izdelkov: strategija dodeljenega prostora in strategija skupnega prostora. Pri strategiji dodeljenega prostora ima vsak izdelek svoj točno določen prostor, pri strategiji skupnega prostora pa je dovoljeno deljenje prostora. Na primer trgovci lahko določenemu izdelku namenijo 20 centimetrov širine police, lahko pa neki skupini izdelkov namenimo prostor, v katerem je razporeditev odvisna od zaloge posameznega izdelka na polici; če ravno dopolnemo zalogo enega izdelka, mora biti ostalih manj, da je na polici dovolj prostora. Če je prostor dodeljen izdelku, je upravljanje urnika polnjenja polic manj zahtevno kot pri strategiji skupnega prostora. Pri slednji morajo biti trgovci na to bolj pozorni, ker lahko v primeru istočasnega polnjenja polic s temi izdelki zmanjka prostora. 
 
 \vspace{4 mm}
 
@@ -46,11 +45,9 @@ Za zgled vzemimo 2 izdelka X in Y, ki imata oba enako velikost 1. Namenimo jima 
 \caption{Poraba prostora strategij}
 \end{figure}
 
-V projektu se bova osredotočila na primerjavo opisanih strategij in kdaj je uporaba določene strategije primernejša. Pri problemu bova predpostavila neodvisno polnjenje polic, torej vsak izdelek ima svoj strošek polnjenja. 
 
 \section{Modeliranje problema}
 
-Upravljanje maloprodajnega prostora je formulirano kot nelinearen mešan celoštevilski program. Naj bo $\mathcal{P} = \{1, 2, ..., M\}$ indeksna množica možnih produktov. Predpostavimo, da imamo konstantno količino varnostne zaloge, ki je potrebna zaradi nihanja povpraševanja. Ta količina je lahko izračunana iz variacije povpraševanja in zahtevane ravni storitev, ki bo v našem primeru blizu 100 odstotkov, to pomeni da bo zelo majhna verjetnost, da katerega koli produkta zmanjka. Zaradi visoke zahtevane ravni storitev bomo v modelu upoštevali samo učinek substitucije izdelkov, ki jih nimamo v ponudbi, učinek substitucije razprodanih izdelkov pa zanemarimo. Predpostavimo tudi, da je povpraševanje eksogeno. Za vsak izdelek iz množice  $\mathcal{P}$, ki ni vključen v ponudbo, se del njegovega povpraševanja prenese na izdelke, ki so v ponudbo vključeni. Ta del povpraševanja zaradi substitucije manjkajočega izdelka je konstanten in neodvisen od ponudbe ostalih izdelkov. 
 
 
 Definirajmo:
