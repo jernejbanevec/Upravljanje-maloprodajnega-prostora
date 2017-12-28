@@ -47,13 +47,13 @@ for i in range(0, M):
 
 
 import numpy as np
-import cvxopt 
+import pulp 
 
 #pomožna funkcija za transponiranje matrike oz vektorja
 def transpose(m):
     return(list(map(list,list(zip(*m)))))
 
-# algoritem strategije deljenega prostora
+# algoritem strategije skupnega prostora
 
 koraki = 0   # števec korakov
 s = d   # začetna vrednost za končno efektivno stopnjo povpraševanja
@@ -63,9 +63,9 @@ T = 0   # začetna vrednost za čas celotnega cikla
 spodnja_meja = 0
 gamma = 0.001   # dovoljena okolica
 S = 100  # največje število korakov
-y = [1 for  i in range(0, velikost_t) if s[i] > 0]
 
-def SC (i, tau, j):
+
+def SC(i, tau, j):
     if i == j:
         resitev = c[i] * s[i] * (1 + theta[i])
     elif i > j:
@@ -74,6 +74,17 @@ def SC (i, tau, j):
         resitev = c[i] * s[i] * (tau[i] - tau[j] + 1 + theta[i])
     return resitev
 
+def resi_CRSP (v, s, T, H, k, y):
+    CRSP = pulp.LpProblem('CRSP', pulp.LpMaximize)
+    
+
+def resi_CAPP (v, t, T, H, k, y, C):
+    CAPP = pulp.LpProblem('CAPP', pulp.LpMaximize)
+    #tu dol je nekje napaka
+    CAPP += np.dot(v, s) - T * np.dot(H, s) - (1 / T) * np.dot(k, y) - [lambda[i] * (C - lpSum(c[j] * s[j] (t[i][j] + T * theta[j]) for j in range(len(c))))) for i in range(len(t[i]))], 'Z'
+    
+
+y = [1 for  i in range(0, velikost_t) if s[i] > 0]
 tau = [0 for  i in range(0, velikost_t)]
 
 while koraki < S:
