@@ -110,7 +110,7 @@ def resi_CAPP (v, t, T, H, k, y, C, w):
     CAPP = pulp.LpProblem('CAPP', pulp.LpMaximize)
     lambda1 = [pulp.LpVariable('lambda1%d' % i, lowBound=0, upBound=1) for i in range(n)]
     x = [[pulp.LpVariable("x%d,%d" % (i, j), lowBound=0) for j in range(n)] for i in range(n)]
-    s = [pulp.LpVariable('s%d' % i, lowBound=0, upBound=1) for i in range(n)]
+    s = [pulp.LpVariable('s%d' % i, lowBound=0) for i in range(n)]
     CAPP += np.dot(v, s) - T * np.dot(H, s) - (1 / T) * np.dot(k, y), 'Z' #- sum(lambda1[i] * (n * C - sum(c[j] * s[j] (t[i][j] + T * theta[j]) for j in range(n))) for i in range(n)) NE DELUJE!
     for i in range(n):
         CAPP += s[i] >= sum(w[i][j]*d[j]*x[i][j] for j in range(n))
