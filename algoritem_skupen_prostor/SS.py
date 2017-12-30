@@ -74,15 +74,36 @@ def SC(i, tau, j):
         resitev = c[i] * s[i] * (tau[i] - tau[j] + 1 + theta[i])
     return resitev
 
-def resi_CRSP (v, s, T, H, k, y):
+def resi_CRSP (v, s, T, H, k, y, C, x):
+    n = len(v)
+    t = [[pulp.LpVariable("x%d,%d" % (i, j), lowBound=0) for j in range(n)] for i in range(n)]
     CRSP = pulp.LpProblem('CRSP', pulp.LpMaximize)
     
 
 def resi_CAPP (v, t, T, H, k, y, C):
+    n = len(v)
     CAPP = pulp.LpProblem('CAPP', pulp.LpMaximize)
-    #tu dol je nekje napaka
-    CAPP += np.dot(v, s) - T * np.dot(H, s) - (1 / T) * np.dot(k, y) - [lambda[i] * (C - lpSum(c[j] * s[j] (t[i][j] + T * theta[j]) for j in range(len(c))))) for i in range(len(t[i]))], 'Z'
-    
+    lambda1 = [pulp.LpVariable('lambda1%d' % i, lowBound=0, upBound=1) for i in range(n)]
+    x = [[pulp.LpVariable("x%d,%d" % (i, j), lowBound=0) for j in range(n)] for i in range(n)]
+    s = [pulp.LpVariable('s%d' % i, lowBound=0, upBound=1) for i in range(n)]
+    #CAPP += np.dot(v, s) - T * np.dot(H, s) - (1 / T) * np.dot(k, y) - [lambda1[i] * (C - lpSum(c[j] * s[j] (t[i][j] + T * theta[j]) for j in range(len(c)))) for i in range(len(t[i]))], 'Z'
+    pogoj = []
+    for i in range(n):
+        pogoj.append(sum(t[i][j] + T * theta[j]) for j in range(n))
+    #CAPP += pulp.lpSum(v[i] * s[i] - (1/T) * (k[i] * y[i]), lambda1[i] * (C - pogoj[i])), 'Z'
+    CAPP += np.dot(v, s) - T * np.dot(H, s) - (1 / T) * np.dot(k, y) - np.dot(lambda1 , (C - sum(c[j] * s[j] (t[i][j] + T * theta[j]) for j in range(n)))), 'Z'                                                                                     
+    for i in range(n):
+        CAPP += s[i] >= sum(w[i][j]*d[j]*x[i][j] for j in range(n))
+        CAPP += s[i] <= sum(w[i][j]*d[j]*x[i][j] for j in range(n))
+    for i in range(n):
+        for j in range(n):
+            CAPP += x[i][j] <= y[i]
+            CAPP += x[i][j] <= 1 - y[i]
+            CAPP += x[i][j] >= y[i]
+    CAPP.solve()
+    for v in CAPP.variables():
+        print(v.name, v.varValue)
+    print(pulp.value(CAPP.objective))
 
 y = [1 for  i in range(0, velikost_t) if s[i] > 0]
 tau = [0 for  i in range(0, velikost_t)]
