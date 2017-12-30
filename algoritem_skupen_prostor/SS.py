@@ -31,9 +31,10 @@ for i in range(0, M):
     v.append(round(v2 + (U - 0.5)* delta_v,3))
     
     N = math.ceil(M / 5)
-    
-    k2 = 30 + 70 * U
-    delta_k = 50 * U
+
+    #spreminjal zaradi negativnega dobička
+    k2 = 0.03 + 0.07 * U
+    delta_k = 0.05 * U
     k.append(round(k2 + (U - 0.5)* delta_k,3))
     
     c2 = 0.05 + 0.1 * U
@@ -43,7 +44,9 @@ for i in range(0, M):
     H.append(round(c[i] * (0.5 + theta[i]),3))
     
     U = round(rd.uniform(0, 1), 2)
-    M = 5 + round(10 * U)
+
+w = [[round(rd.uniform(0, (1/M)), 3) for i in range(M)] for j in range(M)] #zaokroženo na 3 decimalke, da je predstavljivo
+    
 
 
 import numpy as np
@@ -65,41 +68,59 @@ gamma = 0.001   # dovoljena okolica
 S = 100  # največje število korakov
 
 
-def SC(i, tau, j):
+def SC(i, tau1, j, theta1):
     if i == j:
-        resitev = c[i] * s[i] * (1 + theta[i])
+        resitev = c[i] * s[i] * (1 + theta1[i])
     elif i > j:
-        resitev = c[i] * s[i] * (tau[i] - tau[j] + theta[i])
+        resitev = c[i] * s[i] * (tau1[i] - tau1[j] + theta1[i])
     else:
-        resitev = c[i] * s[i] * (tau[i] - tau[j] + 1 + theta[i])
+        resitev = c[i] * s[i] * (tau1[i] - tau1[j] + 1 + theta1[i])
     return resitev
 
-def resi_CRSP (v, s, T, H, k, y, C, x):
+def resi_CRSP (v, s, T, H, k, y, C, beta):
     n = len(v)
-    t = [[pulp.LpVariable("x%d,%d" % (i, j), lowBound=0) for j in range(n)] for i in range(n)]
-    CRSP = pulp.LpProblem('CRSP', pulp.LpMaximize)
-    
+    CRSP = pulp.LpProblem('CRSP', pulp.LpMinimize)
+    #t = [[pulp.LpVariable("x%d,%d" % (i, j), lowBound=0) for j in range(n)] for i in range(n)]
+    tau = [pulp.LpVariable('tau%d' % i, lowBound=0, upBound=1) for i in range(n)]
+    CRSP += T * beta, 'Z'
+    for j in range(n):
+        CRSP += sum(SC(i, tau, j, theta) for i in range(n)) <= beta
+    for i in range(n):
+        for j in range(n):
+            if j > i:
+                CRSP += tau[j] - tau[i] >= 0
+    CRSP.solve()
+    for v in CRSP.variables():
+        print(v.name, v.varValue)
+    print(pulp.value(CRSP.objective))
 
-def resi_CAPP (v, t, T, H, k, y, C):
+def iz_tau_t (tau):
+    t = [[0 for x in range(0, velikost_t)] for y in range(0, velikost_t)]
+    n = len(tau)
+    for i in range(n):
+        t[i][i] = 0.
+        for j in range(i):
+            t[i][j] = tau[j] - tau[i]
+        for j in range(i, n):
+            t[i][j] = T - (tau[j] - tau[i])
+    return t
+
+def resi_CAPP (v, t, T, H, k, y, C, w):
     n = len(v)
     CAPP = pulp.LpProblem('CAPP', pulp.LpMaximize)
     lambda1 = [pulp.LpVariable('lambda1%d' % i, lowBound=0, upBound=1) for i in range(n)]
     x = [[pulp.LpVariable("x%d,%d" % (i, j), lowBound=0) for j in range(n)] for i in range(n)]
     s = [pulp.LpVariable('s%d' % i, lowBound=0, upBound=1) for i in range(n)]
-    #CAPP += np.dot(v, s) - T * np.dot(H, s) - (1 / T) * np.dot(k, y) - [lambda1[i] * (C - lpSum(c[j] * s[j] (t[i][j] + T * theta[j]) for j in range(len(c)))) for i in range(len(t[i]))], 'Z'
-    pogoj = []
-    for i in range(n):
-        pogoj.append(sum(t[i][j] + T * theta[j]) for j in range(n))
-    #CAPP += pulp.lpSum(v[i] * s[i] - (1/T) * (k[i] * y[i]), lambda1[i] * (C - pogoj[i])), 'Z'
-    CAPP += np.dot(v, s) - T * np.dot(H, s) - (1 / T) * np.dot(k, y) - np.dot(lambda1 , (C - sum(c[j] * s[j] (t[i][j] + T * theta[j]) for j in range(n)))), 'Z'                                                                                     
+    CAPP += np.dot(v, s) - T * np.dot(H, s) - (1 / T) * np.dot(k, y), 'Z' #- sum(lambda1[i] * (n * C - sum(c[j] * s[j] (t[i][j] + T * theta[j]) for j in range(n))) for i in range(n)) NE DELUJE!
     for i in range(n):
         CAPP += s[i] >= sum(w[i][j]*d[j]*x[i][j] for j in range(n))
         CAPP += s[i] <= sum(w[i][j]*d[j]*x[i][j] for j in range(n))
-    for i in range(n):
         for j in range(n):
             CAPP += x[i][j] <= y[i]
-            CAPP += x[i][j] <= 1 - y[i]
-            CAPP += x[i][j] >= y[i]
+            if i != j:
+                CAPP += x[i][j] <= 1 - y[j]
+            CAPP += y[i] == 0 or y[i] == 1
+            CAPP += C - sum(c[j] * s[j] * (t[i][j] + T * theta[j]) for j in range(n)) >= 0 
     CAPP.solve()
     for v in CAPP.variables():
         print(v.name, v.varValue)
@@ -126,10 +147,8 @@ while koraki < S:
 
     # iz CRSP poiščemo optimalen t, za dane T, y in s
     
-    
-    
 
-    # iz CAPP poiščemo optimalen s, za dane T, t in s
+    # iz CAPP poiščemo optimalen s, za dane T, t 
 
 
     # povečam število korakov za 1
