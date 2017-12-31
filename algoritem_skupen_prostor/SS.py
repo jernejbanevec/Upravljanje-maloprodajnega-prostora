@@ -52,20 +52,10 @@ w = [[round(rd.uniform(0, (1/M)), 3) for i in range(M)] for j in range(M)] #zaok
 import numpy as np
 import pulp 
 
-#pomožna funkcija za transponiranje matrike oz vektorja
-def transpose(m):
-    return(list(map(list,list(zip(*m)))))
 
 # algoritem strategije skupnega prostora
 
-koraki = 0   # števec korakov
-s = d   # začetna vrednost za končno efektivno stopnjo povpraševanja
-velikost_t = len(d)
-t = [[0 for x in range(0, velikost_t)] for y in range(0, velikost_t)] # ničelna matrika (začetna vrednost za t_{ij})
-T = 0   # začetna vrednost za čas celotnega cikla
-spodnja_meja = 0
-gamma = 0.001   # dovoljena okolica
-S = 100  # največje število korakov
+
 
 
 def SC(i, tau1, j, theta1):
@@ -76,6 +66,20 @@ def SC(i, tau1, j, theta1):
     else:
         resitev = c[i] * s[i] * (tau1[i] - tau1[j] + 1 + theta1[i])
     return resitev
+
+def vrni_s (s, s_vrednosti):
+    n1 = len(s)
+    if n1 <= 10:
+        return s_vrednosti[0: n1]
+    else:
+        return s_vrednosti[0:2] + s_vrednosti[(n1 - 10 + 2):(n1)] + s_vrednosti[2:(n1 - 10 + 2)]
+
+def vrni_tau (s, s_vrednosti):
+    n1 = len(s)
+    if n1 <= 10:
+        return s_vrednosti[1: (n1+1)]
+    else:
+        return s_vrednosti[1:3] + s_vrednosti[(n1 - 10 + 3):(n1 + 1)] + s_vrednosti[3:(n1 - 10 + 3)]
 
 def resi_CRSP (v, s, T, H, k, y, C, beta):
     n = len(v)
@@ -90,9 +94,13 @@ def resi_CRSP (v, s, T, H, k, y, C, beta):
             if j > i:
                 CRSP += tau[j] - tau[i] >= 0
     CRSP.solve()
+    asa1 = []
     for v in CRSP.variables():
         print(v.name, v.varValue)
+        asa1.append(v.varValue)
     print(pulp.value(CRSP.objective))
+    vrednost = pulp.value(CRSP.objective)
+    return (vrednost, vrni_tau(tau, asa1))
 
 def iz_tau_t (tau):
     t = [[0 for x in range(0, velikost_t)] for y in range(0, velikost_t)]
@@ -104,6 +112,7 @@ def iz_tau_t (tau):
         for j in range(i, n):
             t[i][j] = T - (tau[j] - tau[i])
     return t
+
 
 def resi_CAPP (v, t, T, H, k, y, C, w):
     n = len(v)
@@ -122,14 +131,26 @@ def resi_CAPP (v, t, T, H, k, y, C, w):
             CAPP += y[i] == 0 or y[i] == 1
             CAPP += C - sum(c[j] * s[j] * (t[i][j] + T * theta[j]) for j in range(n)) >= 0 
     CAPP.solve()
+    asa1 = []
     for v in CAPP.variables():
         print(v.name, v.varValue)
+        asa1.append(v.varValue)
     print(pulp.value(CAPP.objective))
+    return (pulp.value(CAPP.objective), vrni_s(s, asa1))
 
-y = [1 for  i in range(0, velikost_t) if s[i] > 0]
+koraki = 0   # števec korakov
+s = d   # začetna vrednost za končno efektivno stopnjo povpraševanja
+velikost_t = len(d)
+t = [[0 for x in range(0, velikost_t)] for y in range(0, velikost_t)] # ničelna matrika (začetna vrednost za t_{ij})
+T = 0   # začetna vrednost za čas celotnega cikla
+spodnja_meja = 0
+gamma = 0.001   # dovoljena okolica
+S = 100  # največje število korakov
 tau = [0 for  i in range(0, velikost_t)]
 
 while koraki < S:
+    y = [1 for  i in range(0, velikost_t) if s[i] > 0]
+    
     # reši f(s), povsod so zamaknjeni indeksi za 1 v levo
     delitelj = 0
     for i in range(0, len(d)):
@@ -146,11 +167,16 @@ while koraki < S:
     T = min(math.sqrt(np.dot(k, y) / np.dot(H, s)), C / beta)
 
     # iz CRSP poiščemo optimalen t, za dane T, y in s
-    
-
+    (vrednost_f, opt_tau) = resi_CRSP(v, s, T, H, k, y, C, beta)
+    t = iz_tau_t(opt_tau)
     # iz CAPP poiščemo optimalen s, za dane T, t 
+    (vrednost_g, s) = resi_CAPP(v, t, T, H, k, y, C, w)
 
 
-    # povečam število korakov za 1
-    koraki += 1
+    (vrednost_f_meja, nepomembno) = resi_CRSP(v, s, T, H, k, y, C, beta)
+    if vrednost_f_meja > spodnja_meja + gamma:
+        break
+    else:
+        spodnja_meja = vrednost_f_meja
+        koraki += 1
     
