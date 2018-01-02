@@ -48,12 +48,14 @@ for i in range(0, M):
 w = [[round(rd.uniform(0, (1/M)), 3) for i in range(M)] for j in range(M)] #zaokroženo na 3 decimalke, da je predstavljivo
     
 
-
+koraki = 0   # števec korakov
+s = d   # začetna vrednost za končno efektivno stopnjo povpraševanja
+velikost_t = len(d)
+t = [[0 for x in range(0, velikost_t)] for y in range(0, velikost_t)] # ničelna matrika (začetna vrednost za t_{ij})
+tau = [0 for  i in range(0, velikost_t)]
+        
 import numpy as np
 import pulp 
-
-
-# algoritem strategije skupnega prostora
 
 
 
@@ -102,7 +104,7 @@ def resi_CRSP (v, s, T, H, k, y, C, beta):
     vrednost = pulp.value(CRSP.objective)
     return (vrednost, vrni_tau(tau, asa1))
 
-def iz_tau_t (tau):
+def iz_tau_t (tau, T):
     t = [[0 for x in range(0, velikost_t)] for y in range(0, velikost_t)]
     n = len(tau)
     for i in range(n):
@@ -138,45 +140,54 @@ def resi_CAPP (v, t, T, H, k, y, C, w):
     print(pulp.value(CAPP.objective))
     return (pulp.value(CAPP.objective), vrni_s(s, asa1))
 
-koraki = 0   # števec korakov
-s = d   # začetna vrednost za končno efektivno stopnjo povpraševanja
-velikost_t = len(d)
-t = [[0 for x in range(0, velikost_t)] for y in range(0, velikost_t)] # ničelna matrika (začetna vrednost za t_{ij})
-T = 0   # začetna vrednost za čas celotnega cikla
-spodnja_meja = 0
-gamma = 0.001   # dovoljena okolica
-S = 100  # največje število korakov
-tau = [0 for  i in range(0, velikost_t)]
-
-while koraki < S:
-    y = [1 for  i in range(0, velikost_t) if s[i] > 0]
-    
-    # reši f(s), povsod so zamaknjeni indeksi za 1 v levo
-    delitelj = 0
-    for i in range(0, len(d)):
-        beta = s[i]* c[i]
-        koef = 0
-        for j in range(0, i):
-            koef += s[j] * c[j]
-        beta *= koef
-        delitelj += s[i]* c[i]
-    beta = beta / delitelj
-    
-
-    # Optimalen T
-    T = min(math.sqrt(np.dot(k, y) / np.dot(H, s)), C / beta)
-
-    # iz CRSP poiščemo optimalen t, za dane T, y in s
-    (vrednost_f, opt_tau) = resi_CRSP(v, s, T, H, k, y, C, beta)
-    t = iz_tau_t(opt_tau)
-    # iz CAPP poiščemo optimalen s, za dane T, t 
-    (vrednost_g, s) = resi_CAPP(v, t, T, H, k, y, C, w)
 
 
-    (vrednost_f_meja, nepomembno) = resi_CRSP(v, s, T, H, k, y, C, beta)
-    if vrednost_f_meja > spodnja_meja + gamma:
-        break
-    else:
-        spodnja_meja = vrednost_f_meja
-        koraki += 1
-    
+# algoritem strategije skupnega prostora
+
+def strategija_skupnega_prostora (d, koraki_max = 50, okolica = 0.01): 
+    koraki = 0   # števec korakov
+    s = d   # začetna vrednost za končno efektivno stopnjo povpraševanja
+    velikost_t = len(d)
+    t = [[0 for x in range(0, velikost_t)] for y in range(0, velikost_t)] # ničelna matrika (začetna vrednost za t_{ij})
+    spodnja_meja = 0
+    T = 0
+    gamma = okolica   # dovoljena okolica
+    S = koraki_max  # največje število korakov
+    tau = [0 for  i in range(0, velikost_t)]
+
+    while koraki < S:
+        y = [1 for  i in range(0, velikost_t) if s[i] > 0]
+        
+        # reši f(s), povsod so zamaknjeni indeksi za 1 v levo
+        
+        delitelj = 0
+        for i in range(0, len(d)):
+            beta = s[i]* c[i]
+            koef = 0
+            for j in range(0, i):
+                koef += s[j] * c[j]
+            beta *= koef
+            delitelj += s[i]* c[i]
+        beta = beta / delitelj
+        
+
+        # Optimalen T
+        T = min(math.sqrt(np.dot(k, y) / np.dot(H, s)), C / beta)
+
+        # iz CRSP poiščemo optimalen t, za dane T, y in s
+        (vrednost_f, opt_tau) = resi_CRSP(v, s, T, H, k, y, C, beta)
+        t = iz_tau_t(opt_tau, T)
+        # iz CAPP poiščemo optimalen s, za dane T, t 
+        (vrednost_g, s) = resi_CAPP(v, t, T, H, k, y, C, w)
+
+
+        (vrednost_f_meja, nepomembno) = resi_CRSP(v, s, T, H, k, y, C, beta)
+        if vrednost_f_meja < spodnja_meja + gamma:
+            break
+        else:
+            spodnja_meja = vrednost_f_meja
+            koraki += 1
+
+    #poračunam vrednost pri "Capacitated problem with independent replenishments
+    vrednost_skupni = sum((v[i] * s[i] - H[i] * s[i] * T - (k[i] * y[i]) / T) for i in range(velikost_t))
+    return vrednost_skupni
