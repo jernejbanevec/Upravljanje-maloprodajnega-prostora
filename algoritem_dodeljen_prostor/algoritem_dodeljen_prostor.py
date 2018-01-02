@@ -18,15 +18,15 @@ def opt_T(lam, y, s, th, c, H, k):
 
 def pogoj_prostor(lam, y, s, th, c, H, k, C):
     T = opt_T(lam, y, s, th, c, H, k)
-    z = 0
+    z = -C
     for i in range(len(y)):
         z += (1 + th[i]) * c[i] * s[i] * T[i]
-    return z - C
+    return z
 
 def resi_DSS(d, v, k, th, C, c, w, H, T):
     n = len(v)
     DSS = pulp.LpProblem('DSS', pulp.LpMaximize)
-    y = [pulp.LpVariable('y%d' % i, lowBound=0, upBound=1) for i in range(n)]
+    y = [pulp.LpVariable('y%d' % i, lowBound=0, upBound=1, cat = pulp.LpInteger) for i in range(n)]
     x = [[pulp.LpVariable("x%d,%d" % (i, j), lowBound=0) for j in range(n)] for i in range(n)]
     s = []
     for i in range(n):
@@ -35,16 +35,27 @@ def resi_DSS(d, v, k, th, C, c, w, H, T):
     for i in range(n):
         for j in range(n):
             DSS += x[i][j] <= y[i]
-            DSS += x[i][j] <= 1 - y[i]
+            if i != j:
+                DSS += x[i][j] <= 1 - y[i]
     DSS += pulp.lpSum((1+th[i])*c[i]*s[i]*T[i] for i in range(n)) <= C
     DSS.solve()
-    for v in DSS.variables():
-        print(v.name, v.varValue)
-    print(pulp.value(DSS.objective))
+    #asa1 = []
+    #for v in DSS.variables():
+     #   print(v.name, v.varValue)
+     #   asa1.append(v.varValue)
+    #print(pulp.value(DSS.objective))
+    s = []
+    for i in range(n):
+        s.append(sum(w[i][j]*d[j]*x[i][j].varValue for j in range(n)))
+    return (pulp.value(DSS.objective), s)
 
-def dodeljen_prostor(d,v,k,th,C,c,eps):
+resi_DSS([132.928, 86.8], [13.293, 8.68], [87.155, 56.0], [8.658, 3.036], 315.59999999999997, [0.134, 0.086], [[1,0.5],[0.5,1]], [1.227172, 0.304096], [0.2918421810493985, 0.5624244657542934])
+
+def dodeljen_prostor(d,v,k,th,C,c,w,eps):
+    global T
+    n = len(d)
     H = [a*(0.5 + b) for a,b in zip(c,th)]
-    s = d
+    s = d[:]
     y = []
     for i in s:
         if i > 0:
@@ -52,12 +63,19 @@ def dodeljen_prostor(d,v,k,th,C,c,eps):
         else:
             y.append(0)
     l = 0
-    while l < 1: #numpy.linalg.norm((numpy.array(s)-numpy.array(s1))) < eps & :
-        lam =  bisekcija_dodeljen_prostor(pogoj_prostor, [0, y, s, th, c, H, k, C], [10, y, s, th, c, H, k, C])
+    s1 = [0]*n
+    while  numpy.linalg.norm((numpy.array(s)-numpy.array(s1))) > eps and l < 1000:
+        lam =  bisekcija_dodeljen_prostor(pogoj_prostor, [0, y, s, th, c, H, k, C], [1000, y, s, th, c, H, k, C])
         l += 1
-    return lam
+        T = opt_T(lam, y, s, th, c, H, k)
+        s1 = s[:]
+        dobicek, s = resi_DSS(d, v, k, th, C, c, w, H, T)
+        norma = numpy.linalg.norm((numpy.array(s)-numpy.array(s1)))
+    Q = []
+    for i in range(n):
+        Q.append(s[i]*T[i])
+    return (dobicek, Q)
 
-x = [1,2,1]
-dodeljen_prostor(x,x,x,x,4,x,0.001)
+dodeljen_prostor([132.928, 86.8], [13.293, 8.68], [87.155, 56.0], [8.658, 3.036], 150.59999999999997, [0.134, 0.086], [[1,0.99],[0.99,1]], 0.01)
 
 
