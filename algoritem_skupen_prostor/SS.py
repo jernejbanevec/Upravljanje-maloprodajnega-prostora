@@ -53,6 +53,8 @@ s = d   # začetna vrednost za končno efektivno stopnjo povpraševanja
 velikost_t = len(d)
 t = [[0 for x in range(0, velikost_t)] for y in range(0, velikost_t)] # ničelna matrika (začetna vrednost za t_{ij})
 tau = [0 for  i in range(0, velikost_t)]
+T = 0
+y = [1 for  i in range(0, velikost_t) if s[i] > 0]
         
 import numpy as np
 import pulp 
@@ -88,20 +90,21 @@ def resi_CRSP (v, s, T, H, k, y, C, beta):
     CRSP = pulp.LpProblem('CRSP', pulp.LpMinimize)
     #t = [[pulp.LpVariable("x%d,%d" % (i, j), lowBound=0) for j in range(n)] for i in range(n)]
     tau = [pulp.LpVariable('tau%d' % i, lowBound=0, upBound=1) for i in range(n)]
-    CRSP += T * beta, 'Z'
+    CRSP += sum(tau[i] for i in range(n)), 'Z'
     for j in range(n):
         CRSP += sum(SC(i, tau, j, theta) for i in range(n)) <= beta
     for i in range(n):
         for j in range(n):
             if j > i:
                 CRSP += tau[j] - tau[i] >= 0
+    CRSP += sum(tau[i] for i in range(n)) >= 1
     CRSP.solve()
     asa1 = []
     for v in CRSP.variables():
-        print(v.name, v.varValue)
-        asa1.append(v.varValue)
+        #print(v.name, v.varValue)
+        asa1.append(v.varValue * T)
     print(pulp.value(CRSP.objective))
-    vrednost = pulp.value(CRSP.objective)
+    vrednost = pulp.value(CRSP.objective) * T
     return (vrednost, vrni_tau(tau, asa1))
 
 def iz_tau_t (tau, T):
@@ -131,11 +134,11 @@ def resi_CAPP (v, t, T, H, k, y, C, w):
             if i != j:
                 CAPP += x[i][j] <= 1 - y[j]
             CAPP += y[i] == 0 or y[i] == 1
-            CAPP += C - sum(c[j] * s[j] * (t[i][j] + T * theta[j]) for j in range(n)) >= 0 
+            CAPP += C - sum(c[j] * s[j] * (t[i][j] + T * theta[j]) for j in range(n)) >= 0
     CAPP.solve()
     asa1 = []
     for v in CAPP.variables():
-        print(v.name, v.varValue)
+        #print(v.name, v.varValue)
         asa1.append(v.varValue)
     print(pulp.value(CAPP.objective))
     return (pulp.value(CAPP.objective), vrni_s(s, asa1))
@@ -156,7 +159,7 @@ def strategija_skupnega_prostora (d, koraki_max = 50, okolica = 0.01):
     tau = [0 for  i in range(0, velikost_t)]
 
     while koraki < S:
-        y = [1 for  i in range(0, velikost_t) if s[i] > 0]
+        y = [1 for  i in range(0, velikost_t) if s[i] > 0 ]
         
         # reši f(s), povsod so zamaknjeni indeksi za 1 v levo
         
@@ -181,11 +184,10 @@ def strategija_skupnega_prostora (d, koraki_max = 50, okolica = 0.01):
         (vrednost_g, s) = resi_CAPP(v, t, T, H, k, y, C, w)
 
 
-        (vrednost_f_meja, nepomembno) = resi_CRSP(v, s, T, H, k, y, C, beta)
-        if vrednost_f_meja < spodnja_meja + gamma:
+        if vrednost_g < spodnja_meja + gamma:
             break
         else:
-            spodnja_meja = vrednost_f_meja
+            spodnja_meja = vrednost_g
             koraki += 1
 
     #poračunam vrednost pri "Capacitated problem with independent replenishments
