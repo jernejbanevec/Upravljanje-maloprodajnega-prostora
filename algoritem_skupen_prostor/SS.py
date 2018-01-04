@@ -154,16 +154,13 @@ def resi_CAPP (v, t, T, H, k, y, C, w):
 
 # algoritem strategije skupnega prostora
 
-def strategija_skupnega_prostora (d, koraki_max = 50, okolica = 0.01): 
+def strategija_skupnega_prostora (d, v, k, theta, C, c, w, H, koraki_max = 50, okolica = 0.01): 
     koraki = 0   # števec korakov
     s = d   # začetna vrednost za končno efektivno stopnjo povpraševanja
     velikost_t = len(d)
-    t = [[0 for x in range(0, velikost_t)] for y in range(0, velikost_t)] # ničelna matrika (začetna vrednost za t_{ij})
     spodnja_meja = 0
-    T = 0
     gamma = okolica   # dovoljena okolica
     S = koraki_max  # največje število korakov
-    tau = [0 for  i in range(0, velikost_t)]
 
     while koraki < S:
         
