@@ -13,7 +13,7 @@ def generiraj_podatke(N = 5 + round(10 * round(rd.uniform(0, 1), 2))):
     c = []
     U = round(rd.uniform(0, 1), 2)
     M = N #5 + round(10 * U)
-    print(M)                    #Da pozneje preverim če je dolžina vektorja prava
+    #print(M)                    #Da pozneje preverim če je dolžina vektorja prava
     C = (5 + 30 * U) * M
 
     for i in range(0, M):
@@ -49,7 +49,34 @@ def generiraj_podatke(N = 5 + round(10 * round(rd.uniform(0, 1), 2))):
     w = [[round(rd.uniform(0, (1/M)), 3) for i in range(M)] for j in range(M)] #zaokroženo na 3 decimalke, da je predstavljivo
     for i in range(M):
         w[i][i] = 1
-    return (d,v,k,theta,C,c,w,H)
+    return list((d,v,k,theta,C,c,w,H))
 
 
 
+strategija_skupnega_prostora(x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7])
+
+def mean(numbers):
+    return float(sum(numbers)) / max(len(numbers), 1)
+
+def primerjava_povprecij(N):
+    ds = []
+    ss = []
+    for i in range(15):
+        x = generiraj_podatke(N)
+        ds.append(dodeljen_prostor(x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7])[0])
+        ss.append(strategija_skupnega_prostora(x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7])[0])
+    povprecje_ds = mean(ds)
+    povprecje_ss = mean(ss)
+    return povprecje_ds, povprecje_ss
+
+def primerjava_porabe_protora(N):
+    ds = []
+    ss = []
+    for i in range(11):
+        x = generiraj_podatke(N)
+        C = (5 + 30 * 0.1 * i) * N
+        ds.append(dodeljen_prostor(x[0], x[1], x[2], x[3], C, x[5], x[6], x[7])[0])
+        ss.append(strategija_skupnega_prostora(x[0], x[1], x[2], x[3], C, x[5], x[6], x[7])[0])
+    povprecje_ds = mean(ds)
+    povprecje_ss = mean(ss)
+    return povprecje_ds, povprecje_ss

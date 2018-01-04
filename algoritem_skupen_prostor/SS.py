@@ -89,7 +89,7 @@ def resi_CAPP(d, v, t, T, H, k, C, c, w, theta):
 
 # algoritem strategije skupnega prostora
 
-def strategija_skupnega_prostora(d, v, k, theta, C, c, w, H, koraki_max=50, okolica=0.01):
+def strategija_skupnega_prostora(d, v, k, theta, C, c, w, H, koraki_max=100, okolica=0.01):
     koraki = 0  # števec korakov
     s = d  # začetna vrednost za končno efektivno stopnjo povpraševanja
     velikost_t = len(d)
@@ -154,7 +154,8 @@ def strategija_skupnega_prostora(d, v, k, theta, C, c, w, H, koraki_max=50, okol
 
     # poračunam vrednost pri "Capacitated problem with independent replenishments
     vrednost_skupni = sum((v[i] * s[i] - H[i] * s[i] * T - (k[i] * y[i]) / T) for i in range(velikost_t))
-    return vrednost_skupni
+    return vrednost_skupni, koraki
 
 
 strategija_skupnega_prostora([86.8, 185.632] , [18.781, 19.325] , [0.051, 0.048] , [0.521, 0.188] , 18.4 , [0.094, 0.068] , [[1, 0.99], [0.99, 1]] , [0.096, 0.047])
+dodeljen_prostor(x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7])
