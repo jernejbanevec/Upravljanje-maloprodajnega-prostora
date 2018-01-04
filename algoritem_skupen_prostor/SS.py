@@ -88,7 +88,7 @@ def vrni_tau (s, s_vrednosti):
     else:
         return s_vrednosti[1:3] + s_vrednosti[(n1 - 10 + 3):(n1 + 1)] + s_vrednosti[3:(n1 - 10 + 3)]
 
-def resi_CRSP (v, s, T, H, k, y, C, beta):
+def resi_CRSP (v, s, T, H, k, y, C, beta, theta):
     n = len(v)
     CRSP = pulp.LpProblem('CRSP', pulp.LpMinimize)
     #t = [[pulp.LpVariable("x%d,%d" % (i, j), lowBound=0) for j in range(n)] for i in range(n)]
@@ -123,7 +123,7 @@ def iz_tau_t (tau, T):
     return t
 
 
-def resi_CAPP (v, t, T, H, k, y, C, w):
+def resi_CAPP (v, t, T, H, k, y, C, w, theta):
     n = len(v)
     CAPP = pulp.LpProblem('CAPP', pulp.LpMaximize)
     y = [pulp.LpVariable('y%d' % i, lowBound=0, upBound=1, cat = pulp.LpInteger) for i in range(n)]
@@ -188,11 +188,11 @@ def strategija_skupnega_prostora (d, v, k, theta, C, c, w, H, koraki_max = 50, o
         T = min(math.sqrt(np.dot(k, y) / np.dot(H, s)), C / beta)
 
         # iz CRSP poiščemo optimalen t, za dane T, y in s
-        (vrednost_f, opt_tau) = resi_CRSP(v, s, T, H, k, y, C, beta)
+        (vrednost_f, opt_tau) = resi_CRSP(v, s, T, H, k, y, C, beta, theta)
         t = iz_tau_t(opt_tau, T)
         
         # iz CAPP poiščemo optimalen s, za dane T, t 
-        (vrednost_g, s) = resi_CAPP(v, t, T, H, k, y, C, w)
+        (vrednost_g, s) = resi_CAPP(v, t, T, H, k, y, C, w, theta)
 
         vrednost_f_meja = np.dot(v, s) - T * np.dot(H, s) - (1 / T) * np.dot(k, y)
 
