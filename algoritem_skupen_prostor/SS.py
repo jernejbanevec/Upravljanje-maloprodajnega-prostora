@@ -193,6 +193,7 @@ def strategija_skupnega_prostora (d, koraki_max = 50, okolica = 0.01):
         # iz CRSP poiščemo optimalen t, za dane T, y in s
         (vrednost_f, opt_tau) = resi_CRSP(v, s, T, H, k, y, C, beta)
         t = iz_tau_t(opt_tau, T)
+        
         # iz CAPP poiščemo optimalen s, za dane T, t 
         (vrednost_g, s) = resi_CAPP(v, t, T, H, k, y, C, w)
 
