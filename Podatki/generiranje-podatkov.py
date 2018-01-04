@@ -59,20 +59,23 @@ def mean(numbers):
     return float(sum(numbers)) / max(len(numbers), 1)
 
 def primerjava_povprecij(N):
-    ds = []
-    ss = []
-    for i in range(15):
-        x = generiraj_podatke(N)
-        ds.append(dodeljen_prostor(x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7])[0])
-        ss.append(strategija_skupnega_prostora(x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7])[0])
-    povprecje_ds = mean(ds)
-    povprecje_ss = mean(ss)
+    povprecje_ss = []
+    povprecje_ds = []
+    for j in range(2, N+1):
+        ds = []
+        ss = []
+        for i in range(250):
+            x = generiraj_podatke(j)
+            ds.append(dodeljen_prostor(x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7])[0])
+            ss.append(strategija_skupnega_prostora(x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7])[0])
+        povprecje_ds.append(mean(ds))
+        povprecje_ss.append(mean(ss))
     return povprecje_ds, povprecje_ss
 
 def primerjava_porabe_protora(N):
     ds = []
     ss = []
-    for i in range(11):
+    for i in range(250):
         x = generiraj_podatke(N)
         C = (5 + 30 * 0.1 * i) * N
         ds.append(dodeljen_prostor(x[0], x[1], x[2], x[3], C, x[5], x[6], x[7])[0])

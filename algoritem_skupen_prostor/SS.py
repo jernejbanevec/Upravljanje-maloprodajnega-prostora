@@ -30,13 +30,15 @@ def resi_CRSP(v, s, c, T, beta, theta):
     CRSP = pulp.LpProblem('CRSP', pulp.LpMinimize)
     # t = [[pulp.LpVariable("x%d,%d" % (i, j), lowBound=0) for j in range(n)] for i in range(n)]
     tau = [pulp.LpVariable('tau%d' % i, lowBound=0, upBound=1) for i in range(n)]
-    CRSP += sum(tau[i] for i in range(n)), 'Z'
+    CRSP += pulp.lpSum(tau[i] * (1.5) for i in range(n)), 'Z'
     for j in range(n):
-        CRSP += sum(SC(i, tau, j, theta, c, s) for i in range(n)) <= beta
+        CRSP += pulp.lpSum(SC(i, tau, j, theta, c, s) for i in range(n)) <= beta
     for i in range(n):
+        CRSP += tau[i] >= 0
+        CRSP += tau[i] <= 1
         for j in range((i + 1), n):
             CRSP += tau[j] - tau[i] >= 0
-    CRSP += sum(tau[i] for i in range(n)) >= 1
+    CRSP += pulp.lpSum(tau[i] for i in range(n)) >= 1
     CRSP.solve()
     asa1 = []
     for v in CRSP.variables():
@@ -44,14 +46,14 @@ def resi_CRSP(v, s, c, T, beta, theta):
         asa1.append(v.varValue * T)
         #asa1.append(v.varValue)
     #print(pulp.value(CRSP.objective))
-    vrednost = pulp.value(CRSP.objective) * T
+    vrednost = pulp.value(CRSP.objective)
     #vrednost = pulp.value(CRSP.objective)
     return (vrednost, vrni_tau(tau, asa1))
 
 
 def iz_tau_t(tau, T):
     n = len(tau)
-    t = [[0 for x in range(n)] for y in range(n)]
+    t = [[T for x in range(n)] for y in range(n)]
     for i in range(n):
         for j in range(i):
             t[i][j] = T + tau[j] - tau[i]
@@ -90,7 +92,7 @@ def resi_CAPP(d, v, t, T, H, k, C, c, w, theta):
 # algoritem strategije skupnega prostora
 
 def strategija_skupnega_prostora(d, v, k, theta, C, c, w, H, koraki_max=100, okolica=0.01):
-    koraki = 0  # števec korakov
+    koraki = 1  # števec korakov
     s = d  # začetna vrednost za končno efektivno stopnjo povpraševanja
     velikost_t = len(d)
     spodnja_meja = 0
@@ -125,7 +127,9 @@ def strategija_skupnega_prostora(d, v, k, theta, C, c, w, H, koraki_max=100, oko
 
         # iz CRSP poiščemo optimalen t, za dane T, y in s
         (vrednost_f, opt_tau) = resi_CRSP(v, s, c, T, beta, theta)
+        print(opt_tau)
         t = iz_tau_t(opt_tau, T)
+        #print(t)
 
         # iz CAPP poiščemo optimalen s, za dane T, t
         (vrednost_g, s) = resi_CAPP(d, v, t, T, H, k, C, c, w, theta)
@@ -154,6 +158,7 @@ def strategija_skupnega_prostora(d, v, k, theta, C, c, w, H, koraki_max=100, oko
 
     # poračunam vrednost pri "Capacitated problem with independent replenishments
     vrednost_skupni = sum((v[i] * s[i] - H[i] * s[i] * T - (k[i] * y[i]) / T) for i in range(velikost_t))
+    print(s)
     return vrednost_skupni, koraki
 
 
