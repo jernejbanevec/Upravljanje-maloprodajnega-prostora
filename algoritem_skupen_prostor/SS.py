@@ -21,11 +21,11 @@ for i in range(0, M):
     CV.append(round(U * CV_B,3))
     
     theta.append(round(1.65 * CV[i],3))
-                                    
+    U = round(rd.uniform(0, 1), 2)
     d2 = 50 + 100 * U
     delta_d = 80 * U
     d.append(round(d2 + (U - 0.5) * delta_d, 3))
-    
+    U = round(rd.uniform(0, 1), 2)
     v2 = 5 + 10 * U
     delta_v = 8 * U
     v.append(round(v2 + (U - 0.5)* delta_v,3))
@@ -33,10 +33,11 @@ for i in range(0, M):
     N = math.ceil(M / 5)
 
     #spreminjal zaradi negativnega dobička
+    U = round(rd.uniform(0, 1), 2)
     k2 = 0.03 + 0.07 * U
     delta_k = 0.05 * U
     k.append(round(k2 + (U - 0.5)* delta_k,3))
-    
+    U = round(rd.uniform(0, 1), 2)
     c2 = 0.05 + 0.1 * U
     delta_c = 0.09 * U
     c.append(round(c2 + (U - 0.5)* delta_c,3))
@@ -46,15 +47,17 @@ for i in range(0, M):
     U = round(rd.uniform(0, 1), 2)
 
 w = [[round(rd.uniform(0, (1/M)), 3) for i in range(M)] for j in range(M)] #zaokroženo na 3 decimalke, da je predstavljivo
+for i in range(M):
+    w[i][i] = 1
     
 
 koraki = 0   # števec korakov
-s = d   # začetna vrednost za končno efektivno stopnjo povpraševanja
-velikost_t = len(d)
+s = d[:]   # začetna vrednost za končno efektivno stopnjo povpraševanja
+velikost_t = len(s)
 t = [[0 for x in range(0, velikost_t)] for y in range(0, velikost_t)] # ničelna matrika (začetna vrednost za t_{ij})
 tau = [0 for  i in range(0, velikost_t)]
 T = 0
-y = [1 for  i in range(0, velikost_t) if s[i] > 0]
+y = [1 for i in range(velikost_t) if s[i] > 0]
         
 import numpy as np
 import pulp 
