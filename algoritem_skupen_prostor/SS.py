@@ -56,7 +56,7 @@ s = d[:]   # začetna vrednost za končno efektivno stopnjo povpraševanja
 velikost_t = len(s)
 t = [[0 for x in range(0, velikost_t)] for y in range(0, velikost_t)] # ničelna matrika (začetna vrednost za t_{ij})
 tau = [0 for  i in range(0, velikost_t)]
-T = 0
+T = 1
 y = [1 for i in range(velikost_t) if s[i] > 0]
         
 import numpy as np
@@ -97,17 +97,18 @@ def resi_CRSP (v, s, T, H, k, y, C, beta):
     for j in range(n):
         CRSP += sum(SC(i, tau, j, theta) for i in range(n)) <= beta
     for i in range(n):
-        for j in range(n):
-            if j > i:
-                CRSP += tau[j] - tau[i] >= 0
+        for j in range((i+1),n):
+            CRSP += tau[j] - tau[i] >= 0
     CRSP += sum(tau[i] for i in range(n)) >= 1
     CRSP.solve()
     asa1 = []
     for v in CRSP.variables():
         #print(v.name, v.varValue)
-        asa1.append(v.varValue * T)
+        #asa1.append(v.varValue * T)
+        asa1.append(v.varValue)
     print(pulp.value(CRSP.objective))
-    vrednost = pulp.value(CRSP.objective) * T
+    #vrednost = pulp.value(CRSP.objective) * T
+    vrednost = pulp.value(CRSP.objective)
     return (vrednost, vrni_tau(tau, asa1))
 
 def iz_tau_t (tau, T):
@@ -125,26 +126,29 @@ def iz_tau_t (tau, T):
 def resi_CAPP (v, t, T, H, k, y, C, w):
     n = len(v)
     CAPP = pulp.LpProblem('CAPP', pulp.LpMaximize)
-    lambda1 = [pulp.LpVariable('lambda1%d' % i, lowBound=0, upBound=1) for i in range(n)]
+    y = [pulp.LpVariable('y%d' % i, lowBound=0, upBound=1, cat = pulp.LpInteger) for i in range(n)]
     x = [[pulp.LpVariable("x%d,%d" % (i, j), lowBound=0) for j in range(n)] for i in range(n)]
-    s = [pulp.LpVariable('s%d' % i, lowBound=0) for i in range(n)]
-    CAPP += np.dot(v, s) - T * np.dot(H, s) - (1 / T) * np.dot(k, y), 'Z' #- sum(lambda1[i] * (n * C - sum(c[j] * s[j] (t[i][j] + T * theta[j]) for j in range(n))) for i in range(n)) NE DELUJE!
+    s = []
     for i in range(n):
-        CAPP += s[i] >= sum(w[i][j]*d[j]*x[i][j] for j in range(n))
-        CAPP += s[i] <= sum(w[i][j]*d[j]*x[i][j] for j in range(n))
+        s.append(sum(w[i][j]*d[j]*x[i][j] for j in range(n)))
+    CAPP += np.dot(v, s) - T * np.dot(H, s) - (1 / T) * np.dot(k, y), 'Z' 
+    for i in range(n):
         for j in range(n):
             CAPP += x[i][j] <= y[i]
             if i != j:
                 CAPP += x[i][j] <= 1 - y[j]
-            CAPP += y[i] == 0 or y[i] == 1
+            #CAPP += y[i] == 0 or y[i] == 1
             CAPP += C - sum(c[j] * s[j] * (t[i][j] + T * theta[j]) for j in range(n)) >= 0
     CAPP.solve()
-    asa1 = []
-    for v in CAPP.variables():
+    s = []
+    #for v in CAPP.variables():
         #print(v.name, v.varValue)
-        asa1.append(v.varValue)
+    for i in range(n):
+        s.append(sum(w[i][j]*d[j]*x[i][j].varValue for j in range(n)))
+    #for v in CAPP.variables():
+        #print(v.name, v.varValue)
     print(pulp.value(CAPP.objective))
-    return (pulp.value(CAPP.objective), vrni_s(s, asa1))
+    return (pulp.value(CAPP.objective), s)
 
 
 
@@ -162,7 +166,13 @@ def strategija_skupnega_prostora (d, koraki_max = 50, okolica = 0.01):
     tau = [0 for  i in range(0, velikost_t)]
 
     while koraki < S:
-        y = [1 for  i in range(0, velikost_t) if s[i] > 0 ]
+        
+        y = []
+        for i in range(velikost_t):
+            if s[i] > 0:
+                y.append(1)
+            else:
+                y.append(0)
         
         # reši f(s), povsod so zamaknjeni indeksi za 1 v levo
         
@@ -186,11 +196,12 @@ def strategija_skupnega_prostora (d, koraki_max = 50, okolica = 0.01):
         # iz CAPP poiščemo optimalen s, za dane T, t 
         (vrednost_g, s) = resi_CAPP(v, t, T, H, k, y, C, w)
 
+        vrednost_f_meja = np.dot(v, s) - T * np.dot(H, s) - (1 / T) * np.dot(k, y)
 
-        if vrednost_g < spodnja_meja + gamma:
+        if vrednost_f_meja < spodnja_meja + gamma:
             break
         else:
-            spodnja_meja = vrednost_g
+            spodnja_meja = vrednost_f_meja
             koraki += 1
 
     #poračunam vrednost pri "Capacitated problem with independent replenishments
