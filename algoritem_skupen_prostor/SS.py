@@ -51,13 +51,13 @@ for i in range(M):
     w[i][i] = 1
     
 
-koraki = 0   # števec korakov
-s = d[:]   # začetna vrednost za končno efektivno stopnjo povpraševanja
-velikost_t = len(s)
-t = [[0 for x in range(0, velikost_t)] for y in range(0, velikost_t)] # ničelna matrika (začetna vrednost za t_{ij})
-tau = [0 for  i in range(0, velikost_t)]
-T = 1
-y = [1 for i in range(velikost_t) if s[i] > 0]
+#koraki = 0   # števec korakov
+#s = d[:]   # začetna vrednost za končno efektivno stopnjo povpraševanja
+#velikost_t = len(s)
+#t = [[0 for x in range(0, velikost_t)] for y in range(0, velikost_t)] # ničelna matrika (začetna vrednost za t_{ij})
+#tau = [0 for  i in range(0, velikost_t)]
+#T = 1
+#y = [1 for i in range(velikost_t) if s[i] > 0]
         
 import numpy as np
 import pulp 
@@ -205,3 +205,7 @@ def strategija_skupnega_prostora (d, v, k, theta, C, c, w, H, koraki_max = 50, o
     #poračunam vrednost pri "Capacitated problem with independent replenishments
     vrednost_skupni = sum((v[i] * s[i] - H[i] * s[i] * T - (k[i] * y[i]) / T) for i in range(velikost_t))
     return vrednost_skupni
+
+
+strategija_skupnega_prostora([132.928, 86.8], [13.293, 8.68], [87.155, 56.0], [8.658, 3.036], 50.59999999999997, [0.134, 0.086], [[1,0.99],[0.99,1]], [1.227172, 0.304096])
+
