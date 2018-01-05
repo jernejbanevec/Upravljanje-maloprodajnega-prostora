@@ -113,7 +113,7 @@ $$  \max  \sum_{i \in \mathcal{P}} ( v_i s_ i - H_i  Q_i - \frac{k_i y_i}{T})   
 \vspace*{1 mm}
 Maksimiziramo torej neto dobiček (celoten dobiček zmanjšan za stroške hranjenja izdelka na polici in polnjenja izdelka). To je mešani celoštevilski program z nelinearno optimizacijsko funkcijo. Ker je ta problem težko rešljiv, obstajajo metode, ki zmanjšajo kompleksnost reševanja. Te metode bova predstavila posebej za vsako strategijo polnjenja polic.
 
-
+\pagebreak
 \section{Strategija skupnega prostora}
 
 Opazimo, da sta v prej navedenem optimizacijskem problemu vkoreninjena dva podproblema. Prvi problem odloča o tem, katere izdelke bomo vključili v ponudbo, drugi pa se ukvarja z urnikom polnjenja polic. 
@@ -137,18 +137,71 @@ $[8] - [13]$
 Z nekaj zvitimi prijemi ta problem poenostavimo: Definiramo $B$, ki predstavlja velikost prostora pri dani izbiri izdelkov v ponudbi in urniku polnjenja zalog, ter $\beta$, ki je enaka $\frac{B}{T}$ in glede na podani $s$ dobimo formuli za izračun optimalnega $T$: 
 $T^{*} (s) = min\{\sqrt{\frac{k' y}{H' s}}, \frac{C}{\beta(s)}  \}$, kjer optimalni $\beta^*  (s) = \sum_{i \in \mathcal{P}} (s_i c_i \cdot \sum_{j = 1}^{i} s_j c_j) \sum_{i \in \mathcal{P}} s_i c_i $.
 
-
-
-\section{Strategija dodeljenega prostora}
-
-$$T^*_i(s, \lambda) = \sqrt{\frac{k_i y_i}{s_i ((1+\theta_i)c_i\lambda + H_i}}$$
+\vspace*{1 mm}
+Če imamo vrednosti, pri katerih prvotni optimizacijski problem doseže maksimalno vrednost $v ^ *$, potem to vrednost dosežeta tudi oba podproblema. Če obnovimo, smo začetni optimizacijski problem razdelili na dva podproblema, kjer rešitev enega predstavlja vhodni podatek za drugega. To je tudi ideja za algoritem strategije skupnega prostora.
 
 \begin{enumerate}
-\item $k = 0, s^k = d$
-\item $k = k + 1$, s pomočjo prej podane formule  za optimalen $T$ izračunamo najmanjšo $\lambda$, tako da bo za dane parametre še zadoščeno pogoju ??.
-\item Za dano $\lambda$ izračunaj optimalen $T^k$.
-\item Rešimo DSS s podanim $T^k$ da dobimo $s^k$; če $s$ konvergira, potem je $s^k$ rešitev, drugače pojdi na korak $2$.
+\item $k = 0, s^k = d, t^k = 0, T^k = 0$ in postavimo zaustavitveni kriterij $L$, ki predstavlja spodnjo mejo, maksimalno število korakov $S$, ter $\epsilon > 0$.
+\item $k = k+1$ in rešimo $f(s ^{k-1})$ in dobimo $T^k$ in $t^k$ .
+\item Rešimo $g(T^k, t^k)$ in dobimo $s^k$.
+\item Če je $L  + \epsilon> f(s^k)$ ali  presežemo maksimalno število korakov ($k > S$), potem končamo.
+\item $L = f(s^k)$ in se vrnemo na prvi korak.
 \end{enumerate}
 
+\pagebreak
+\section{Strategija dodeljenega prostora}
+
+Če je prostor dodeljen vsakemu produktu, je dopolnjevanje zalog enostavnejše in ne potrebujemo usklajevati urnika polnjenja zalog in skupnega časa cikla dopolnjevanja zalog na policah. Torej vsak produkt ima svoj cikel. Namesto pogoja $[13]$ definiramo drugačen pogoj, ki nam zagotavlja prostor na policah: $[14]\hspace*{1 mm} \sum_{i \in \mathcal{P}} (1 + \theta_i) c_i s_i T_i \leq C$. Sledi, da je problem pri strategiji dodeljenega prostora naslednji:
+$$ \max  \sum_{i \in \mathcal{P}} ( v_i s_ i - H_i  s_i T_i - \frac{k_i y_i}{T_i})  $$
+p.p.
+
+$[1] - [5]$ in $[14]$
+
+\vspace*{1 mm}
+Ker je $T$ vsebovan samo v pogoju $[14]$, lahko z metodo Lagrangejevih multiplikatorjev pridemo do sledeče formule:
+$T^*_i(s, \lambda) = \sqrt{\frac{k_i y_i}{s_i ((1+\theta_i)c_i\lambda + H_i}}$
+
+Ideja algoritma strategije dodeljenega prostora:
+\begin{enumerate}
+\item $k = 0, s^k = d$
+\item $k = k + 1$, s pomočjo prej podane formule  za optimalen $T$ izračunamo najmanjšo $\lambda \geq 0$, tako da bo za dane parametre še zadoščeno pogoju $[14]$.
+\item Za dano $\lambda$ izračunamo optimalen $T^k$.
+\item Rešimo DSS s podanim $T^k$ da dobimo $s^k$; če $s$ konvergira, potem je $s^k$ rešitev, drugače gremo na korak $2$.
+\end{enumerate}
+
+\section{Generiranje podatkov}
+
+
+Vzela sva širok nabor parametrov, ki so večinoma povzeti po viru. Vsak parameter je odvisen od $U$, ki predstavlja naključno generirano število na odprtem intervalu $(0,1)$. $M$ je število produktov, ki lahko nastopajo v ponudbi trgovin. Analizo sva delala z najmanj dvema in največ desetimi produkti. Pri vsakem produktu sva za vsako lastnost generirala novo število $U$.
+
+ \vspace*{3 mm}
+
+\begin{tabular}{ l l | l l }
+	\hline
+  $C$ & $(5 + 30 U) \cdot M$ & $ \Delta_v $ & $8 U$\\
+  $CV_i$ & $U \cdot CV_B$ & $k_i$ & $\bar{k} + (U - 0.5) \Delta_k$\\
+  $CV_B$ & $1 + 9 U$ & $ \bar{k}$ & $0.03 + 0.07 U$\\
+  $\theta_i$ & $ 1.65 \cdot CV_i$ & $ \Delta_k$ & $0.05 U$\\
+  $d_i$ & $\bar{d} + (U - 0.5) \Delta_d$ & $ c_i$ & $\bar{c} + (U - 0.5) \Delta_c$\\
+  $\bar{d}$ & $50 + 100 U$ & $\bar{c}$ & $ 0.05 + 0.1 U$\\
+  $\Delta_d$ & $80 U$ & $\Delta_c$ & $0.09 U$\\
+  $ v_i$ & $\bar{v} + (U - 0.5) \Delta_v$ & $H_i$ & $ c_i \cdot (\frac{1}{2} + \theta_i)$\\
+  $ \bar{v}$ & $ 5 + 10 U$ & &\\
+	\hline
+\end{tabular}
+
+
+\section{Analiza}
+
+
+
+
+
+
+\section{Vir}
+
+\begin{enumerate}
+\item Zhang W. , Rajaram K. 2017. Managing limited retail space for basic products: Space sharing vs. space dedication. \textit{European Journal of Operational Research}. 263, 768 - 781
+\end{enumerate}
 
 \end{document}

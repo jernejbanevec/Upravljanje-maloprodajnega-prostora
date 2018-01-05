@@ -9,15 +9,9 @@ def SC(i, tau1, j, theta1, c, s):
     return resitev
 
 
-def vrni_s(s, s_vrednosti):
-    n1 = len(s)
-    if n1 <= 10:
-        return s_vrednosti[0: n1]
-    else:
-        return s_vrednosti[0:2] + s_vrednosti[(n1 - 10 + 2):(n1)] + s_vrednosti[2:(n1 - 10 + 2)]
-
 
 def vrni_tau(s, s_vrednosti):
+    # Funkcija, ki zlozi narobe sestavljen tau (tau0 tau1 tau10 tau2 ...) v prav vrstni red
     n1 = len(s)
     if n1 <= 10:
         return s_vrednosti[0: (n1)]
@@ -26,8 +20,9 @@ def vrni_tau(s, s_vrednosti):
 
 
 def resi_CRSP(v, s, c, T, beta, theta):
+    # Fukcija, ki resi CRSP oz. f(s, y)
     n = len(v)
-    CRSP = pulp.LpProblem('CRSP', pulp.LpMinimize)
+    CRSP = pulp.LpProblem('CRSP', pulp.LpMaximize)
     tau = [pulp.LpVariable('tau%d' % i, lowBound=0, upBound=1) for i in range(n)]
     CRSP += pulp.lpSum(tau[i] for i in range(n)), 'Z'
     for j in range(n):
@@ -47,6 +42,7 @@ def resi_CRSP(v, s, c, T, beta, theta):
 
 
 def iz_tau_t(tau, T):
+    # Funkcija, ki zlozi matriko t iz vektorja tau
     n = len(tau)
     t = [[T for x in range(n)] for y in range(n)]
     for i in range(n):
@@ -58,6 +54,7 @@ def iz_tau_t(tau, T):
 
 
 def resi_CAPP(d, v, t, T, H, k, C, c, w, theta):
+    # Funkcija, ki resi CAPP oz g(T, t)
     n = len(v)
     CAPP = pulp.LpProblem('CAPP', pulp.LpMaximize)
     y = [pulp.LpVariable('y%d' % i, lowBound=0, upBound=1, cat=pulp.LpInteger) for i in range(n)]
@@ -149,8 +146,8 @@ def strategija_skupnega_prostora(d, v, k, theta, C, c, w, H, koraki_max=100, oko
     Q = []
     for i in range(len(s)):
         Q.append(s[i]*T)
-    return vrednost_skupni, s, Q, opt_tau
+    return vrednost_skupni, s, T, koraki, Q, opt_tau
 
 
-strategija_skupnega_prostora([86.8, 185.632] , [18.781, 19.325] , [0.051, 0.048] , [0.521, 0.188] , 18.4 , [0.094, 0.068] , [[1, 0.99], [0.99, 1]] , [0.096, 0.047])
-dodeljen_prostor(x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7])
+#strategija_skupnega_prostora([86.8, 185.632] , [18.781, 19.325] , [0.051, 0.048] , [0.521, 0.188] , 18.4 , [0.094, 0.068] , [[1, 0.99], [0.99, 1]] , [0.096, 0.047])
+#dodeljen_prostor(x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7])
