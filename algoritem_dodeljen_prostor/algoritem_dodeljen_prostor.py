@@ -51,8 +51,6 @@ def resi_DSS(d, v, k, theta, C, c, w, H, T):
     DSS += pulp.lpSum((1+theta[i])*c[i]*s[i]*T[i] for i in range(n)) <= C
     DSS.solve()
     s = []
-    #for v in DSS.variables():
-        #print(v.name, v.varValue)
     for i in range(n):
         s.append(sum(w[i][j]*d[j]*x[i][j].varValue for j in range(n)))
     return (pulp.value(DSS.objective), s)
@@ -80,6 +78,6 @@ def dodeljen_prostor(d,v,k,theta,C,c,w,H,eps=0.01):
     Q = []
     for i in range(n):
         Q.append(s[i]*T[i])
-    return (dobicek, Q, s, T,l, H)
+    return (dobicek, s, Q, T)
 
 

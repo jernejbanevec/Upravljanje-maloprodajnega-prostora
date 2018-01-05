@@ -64,7 +64,7 @@ def primerjava_povprecij(N):
     for j in range(2, N+1):
         ds = []
         ss = []
-        for i in range(250):
+        for i in range(100):
             x = generiraj_podatke(j)
             ds.append(dodeljen_prostor(x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7])[0])
             ss.append(strategija_skupnega_prostora(x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7])[0])
@@ -75,7 +75,7 @@ def primerjava_povprecij(N):
 def primerjava_porabe_protora(N):
     ds = []
     ss = []
-    for i in range(250):
+    for i in range(100):
         x = generiraj_podatke(N)
         C = (5 + 30 * 0.1 * i) * N
         ds.append(dodeljen_prostor(x[0], x[1], x[2], x[3], C, x[5], x[6], x[7])[0])

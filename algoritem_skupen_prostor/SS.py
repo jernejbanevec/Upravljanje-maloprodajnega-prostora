@@ -28,9 +28,8 @@ def vrni_tau(s, s_vrednosti):
 def resi_CRSP(v, s, c, T, beta, theta):
     n = len(v)
     CRSP = pulp.LpProblem('CRSP', pulp.LpMinimize)
-    # t = [[pulp.LpVariable("x%d,%d" % (i, j), lowBound=0) for j in range(n)] for i in range(n)]
     tau = [pulp.LpVariable('tau%d' % i, lowBound=0, upBound=1) for i in range(n)]
-    CRSP += pulp.lpSum(tau[i] * (1.5) for i in range(n)), 'Z'
+    CRSP += pulp.lpSum(tau[i] for i in range(n)), 'Z'
     for j in range(n):
         CRSP += pulp.lpSum(SC(i, tau, j, theta, c, s) for i in range(n)) <= beta
     for i in range(n):
@@ -42,12 +41,8 @@ def resi_CRSP(v, s, c, T, beta, theta):
     CRSP.solve()
     asa1 = []
     for v in CRSP.variables():
-        # print(v.name, v.varValue)
         asa1.append(v.varValue * T)
-        #asa1.append(v.varValue)
-    #print(pulp.value(CRSP.objective))
     vrednost = pulp.value(CRSP.objective)
-    #vrednost = pulp.value(CRSP.objective)
     return (vrednost, vrni_tau(tau, asa1))
 
 
@@ -79,13 +74,8 @@ def resi_CAPP(d, v, t, T, H, k, C, c, w, theta):
         CAPP += C - sum(c[j] * s[j] * (t[i][j] + T * theta[j]) for j in range(n)) >= 0
     CAPP.solve()
     s = []
-    # for v in CAPP.variables():
-    # print(v.name, v.varValue)
     for i in range(n):
         s.append(sum(w[i][j] * d[j] * x[i][j].varValue for j in range(n)))
-    # for v in CAPP.variables():
-    # print(v.name, v.varValue)
-    #print(pulp.value(CAPP.objective))
     return (pulp.value(CAPP.objective), s)
 
 
@@ -127,9 +117,7 @@ def strategija_skupnega_prostora(d, v, k, theta, C, c, w, H, koraki_max=100, oko
 
         # iz CRSP poiščemo optimalen t, za dane T, y in s
         (vrednost_f, opt_tau) = resi_CRSP(v, s, c, T, beta, theta)
-        print(opt_tau)
         t = iz_tau_t(opt_tau, T)
-        #print(t)
 
         # iz CAPP poiščemo optimalen s, za dane T, t
         (vrednost_g, s) = resi_CAPP(d, v, t, T, H, k, C, c, w, theta)
@@ -158,8 +146,10 @@ def strategija_skupnega_prostora(d, v, k, theta, C, c, w, H, koraki_max=100, oko
 
     # poračunam vrednost pri "Capacitated problem with independent replenishments
     vrednost_skupni = sum((v[i] * s[i] - H[i] * s[i] * T - (k[i] * y[i]) / T) for i in range(velikost_t))
-    print(s)
-    return vrednost_skupni, koraki
+    Q = []
+    for i in range(len(s)):
+        Q.append(s[i]*T)
+    return vrednost_skupni, s, Q, opt_tau
 
 
 strategija_skupnega_prostora([86.8, 185.632] , [18.781, 19.325] , [0.051, 0.048] , [0.521, 0.188] , 18.4 , [0.094, 0.068] , [[1, 0.99], [0.99, 1]] , [0.096, 0.047])
