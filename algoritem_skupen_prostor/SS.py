@@ -1,4 +1,5 @@
 #strategija skupnega prostora
+
 def SC(i, tau1, j, theta1, c, s):
     if i == j:
         resitev = c[i] * s[i] * (1 + theta1[i])
@@ -7,7 +8,6 @@ def SC(i, tau1, j, theta1, c, s):
     else:
         resitev = c[i] * s[i] * (tau1[i] - tau1[j] + 1 + theta1[i])
     return resitev
-
 
 
 def vrni_tau(s, s_vrednosti):
@@ -19,32 +19,12 @@ def vrni_tau(s, s_vrednosti):
         return s_vrednosti[0:3] + s_vrednosti[(n1 - 10 + 2):(n1)] + s_vrednosti[3:(n1 - 10 + 2)]
 
 
-def resi_CRSP(v, s, c, T, beta, theta):
-    # Fukcija, ki resi CRSP oz. f(s, y)
-    n = len(v)
-    CRSP = pulp.LpProblem('CRSP', pulp.LpMaximize)
-    tau = [pulp.LpVariable('tau%d' % i, lowBound=0, upBound=1) for i in range(n)]
-    CRSP += pulp.lpSum(tau[i] for i in range(n)), 'Z'
-    for j in range(n):
-        CRSP += pulp.lpSum(SC(i, tau, j, theta, c, s) for i in range(n)) <= beta
-    for i in range(n):
-        CRSP += tau[i] >= 0
-        CRSP += tau[i] <= 1
-        for j in range((i + 1), n):
-            CRSP += tau[j] - tau[i] >= 0
-    CRSP += pulp.lpSum(tau[i] for i in range(n)) >= 1
-    CRSP.solve()
-    asa1 = []
-    for v in CRSP.variables():
-        asa1.append(v.varValue * T)
-    vrednost = pulp.value(CRSP.objective)
-    return (vrednost, vrni_tau(tau, asa1))
-
 def naredi_tau(M):
     tau = []
     for i in range(M):
         tau.append(i/M)
     return tau
+
 
 def iz_tau_t(tau, T):
     # Funkcija, ki zlozi matriko t iz vektorja tau
@@ -79,7 +59,6 @@ def resi_CAPP(d, v, t, T, H, k, C, c, w, theta):
     for i in range(n):
         s.append(sum(w[i][j] * d[j] * x[i][j].varValue for j in range(n)))
     return (pulp.value(CAPP.objective), s)
-
 
 # algoritem strategije skupnega prostora
 
@@ -118,7 +97,6 @@ def strategija_skupnega_prostora(d, v, k, theta, C, c, w, H, koraki_max=100, oko
         T = min(math.sqrt(np.dot(k, y) / np.dot(H, s)), C / beta)
 
         # iz CRSP poiščemo optimalen t, za dane T, y in s
-        #(vrednost_f, opt_tau) = resi_CRSP(v, s, c, T, beta, theta)
         opt_tau = naredi_tau(velikost_t)
         t = iz_tau_t(opt_tau, T)
 
@@ -152,8 +130,5 @@ def strategija_skupnega_prostora(d, v, k, theta, C, c, w, H, koraki_max=100, oko
     Q = []
     for i in range(len(s)):
         Q.append(s[i]*T)
-    return vrednost_skupni, koraki, s, T, Q, t
+    return vrednost_skupni, y, T, Q, opt_tau
 
-
-#strategija_skupnega_prostora([86.8, 185.632] , [18.781, 19.325] , [0.051, 0.048] , [0.521, 0.188] , 18.4 , [0.094, 0.068] , [[1, 0.99], [0.99, 1]] , [0.096, 0.047])
-#dodeljen_prostor(x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7])
