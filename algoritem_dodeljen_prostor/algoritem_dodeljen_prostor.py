@@ -1,8 +1,6 @@
 #strategija dodeljenega prostora
 import numpy as np
-import math
 import pulp
-
 
 def bisekcija_dodeljen_prostor(f, a, b, eps=0.01):
     #Funkcija izračuna ničlo dane funkcije f (prilagojena za funkcijo pogoj_prostor)
@@ -37,29 +35,29 @@ def resi_DSS(d, v, k, theta, C, c, w, H, T):
     #Funkcija reši linearni program DSS(dedication space strategy) - maksimizacija profita pri strategiji danega prostora za dane parametre.
     n = len(v)
     DSS = pulp.LpProblem('DSS', pulp.LpMaximize)
-    y = [pulp.LpVariable('y%d' % i, lowBound=0, upBound=1, cat = pulp.LpInteger) for i in range(n)]
+    y = [pulp.LpVariable('y%d' % i, lowBound=0, upBound=1, cat = pulp.LpInteger) for i in range(n)] #definiramo odločevalne spremenljivke y in pomožne spremenljivke x
     x = [[pulp.LpVariable("x%d,%d" % (i, j), lowBound=0) for j in range(n)] for i in range(n)]
     s = []
     for i in range(n):
-        s.append(sum(w[i][j]*d[j]*x[i][j] for j in range(n)))
-    DSS += pulp.lpSum(v[i]*s[i] - H[i]*v[i]*T[i] - k[i]*y[i]/T[i] for i in range(n)), 'Z'
-    for i in range(n):
+        s.append(sum(w[i][j]*d[j]*x[i][j] for j in range(n))) #definiramo efektivno povpraševanje
+    DSS += pulp.lpSum(v[i]*s[i] - H[i]*v[i]*T[i] - k[i]*y[i]/T[i] for i in range(n)), 'Z' #maksimizacijska funkcija
+    for i in range(n): #postavimo omejitve za x
         for j in range(n):
             DSS += x[i][j] <= y[i]
             if i != j:
                 DSS += x[i][j] <= 1 - y[j]
-    DSS += pulp.lpSum((1+theta[i])*c[i]*s[i]*T[i] for i in range(n)) <= C
+    DSS += pulp.lpSum((1+theta[i])*c[i]*s[i]*T[i] for i in range(n)) <= C #pogoj prostora
     DSS.solve()
     s = []
     for i in range(n):
-        s.append(sum(w[i][j]*d[j]*x[i][j].varValue for j in range(n)))
+        s.append(sum(w[i][j]*d[j]*x[i][j].varValue for j in range(n))) #iz rešenega linearnega programa naredimo s
     return (pulp.value(DSS.objective), s)
 
-#resi_DSS([132.928, 86.8], [13.293, 8.68], [87.155, 56.0], [8.658, 3.036], 315.59999999999997, [0.134, 0.086], [[1,0.5],[0.5,1]], [1.227172, 0.304096], [1.2918421810493985, 1.5624244657542934])
 
 def dodeljen_prostor(d,v,k,theta,C,c,w,H,eps=0.01):
     #Funkcija reši problem strategije dodeljenega prostora
-    n = len(d)
+    #(za dane paodatke nam poda največji dobiček, katere izdelke vključiti v ponudbo, čas cikla polnjenja izdelkov in količino izdelkov ob posameznem polnjenju
+    n = len(d) #število izdelkov
     s = d[:]
     y = []
     for i in s:
@@ -69,18 +67,14 @@ def dodeljen_prostor(d,v,k,theta,C,c,w,H,eps=0.01):
             y.append(0)
     l = 0
     s1 = [0]*n
-    while np.linalg.norm((np.array(s)-np.array(s1))) > eps and l < 100:
-        lam =  bisekcija_dodeljen_prostor(pogoj_prostor, [0, y, s, theta, c, H, k, C], [1000, y, s, theta, c, H, k, C])
+    while np.linalg.norm((np.array(s)-np.array(s1))) > eps and l < 100: #ponavljamo, dokler si zaporedna s-a nista dovolj blizu oz. dokler ni norma razlike manjša od epsilon
+        lam =  bisekcija_dodeljen_prostor(pogoj_prostor, [0, y, s, theta, c, H, k, C], [1000, y, s, theta, c, H, k, C]) #poiščemo najmanjšo nenegativno lambdo, da pri danih parametrih ni kršen pogoj prostora iz DSS
         l += 1
-        T = opt_T(lam, y, s, theta, c, H, k)
+        T = opt_T(lam, y, s, theta, c, H, k) #čas cikla z najboljšo lambdo
         s1 = s[:]
-        dobicek, s = resi_DSS(d, v, k, theta, C, c, w, H, T)
+        dobicek, s = resi_DSS(d, v, k, theta, C, c, w, H, T) #za dane podatke rešimo DSS in dobimo dobiček in s
     Q = []
-    norma = 0
-    if l == 100:
-        norma = np.linalg.norm((np.array(s) - np.array(s1)))
-    for i in range(n):
+    for i in range(n): #izračunamo Q
         Q.append(s[i]*T[i])
-    return (dobicek, l, s, T, Q, norma)
-#dodeljen_prostor([72.032, 50.0, 170.848], [9.453, 7.0, 9.587], [31, 44, 69], [4.704, 5.046, 11.339], 60.900000000000006, [0.072, 0.084, 0.158], [[1, 0.05, 0.32], [0.269, 1, 0.116], [0.273, 0.148, 1]], [0.375, 0.466, 1.871])
+    return (dobicek, y, T, Q)
 
