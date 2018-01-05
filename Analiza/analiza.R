@@ -1,7 +1,12 @@
 require(reshape2)
 
+#Generirava od 2 do 15 podatkov
 st_produktov <- c(2:15)
+
+#Doloèiva razliène C, da pozneje strategiji lahko primerjava tudi glede na ponudbo celotnega prostora, ki ga imamo na razpolago
 C <- c(20.0, 32.0, 44.0, 56.0, 68.0, 80.0, 92.0, 104.0, 116.0, 128.0, 140.0)
+
+#Podaktke generirava dvakrat za obe strategiji, obakrat za od 2 do 15 izdelkov, ter povpreèja izraèunava iz vzorca velikosti 150
 
 povprecja_ds2 <- c(1570.4492053618771, 2594.0359927099594, 3312.7105366827827, 4165.512177465852, 5008.286648521151, 6019.373105010036, 6862.542727763537, 7771.1027920611905, 8233.333423108286, 9197.708207762675, 10328.078587034914, 11250.349882205286, 11641.207568570257, 12805.595715579124)
 povprecja_ss2 <- c(914.1135052619471, 1515.5968932896749, 2082.353586581799, 2615.373000279465, 3400.076665979961, 3868.9451976764976, 4410.00945935456, 5116.067281899035, 5452.532912760001, 5752.143734433003, 7026.204444453788, 7599.368274323282, 7817.536072551987, 8436.661590499965)
@@ -20,10 +25,11 @@ colnames(povprecja) <- c('st','ds','ss')
 poraba <- data.frame(C, prostor_ds, prostor_ss)
 colnames(poraba) <- c('C','ds','ss')
 
+#Graf primerjave dobièkov obeh strategij v odvisnosti od števila produktov
 plot(povprecja$st, povprecja$ds, 'b', 
-     main = 'Primerjava dobiÄkov strategij v odvisnosti od Å¡tevila produktov',
-     xlab = 'Å¡tevilo produktov',
-     ylab = 'dobiÄek',
+     main = 'Primerjava dobièkov strategij v odvisnosti od števila produktov',
+     xlab = 'število produktov',
+     ylab = 'dobièek',
      ylim = c(0,13000),
      col = 'orange',
      lwd = 2)
@@ -36,10 +42,11 @@ legend('bottomright',
        lwd = 1:1,
        bty = 'n')
 
+#Graf primerjave dobièkov obeh strategij v odvisnosti od prostora
 plot(poraba$C, poraba$ds, 'b', 
-     main = 'Primerjava dobiÄkov strategij v odvisnosti od prostora',
+     main = 'Primerjava dobièkov strategij v odvisnosti od prostora',
      xlab = 'prostor',
-     ylab = 'dobiÄek',
+     ylab = 'dobièek',
      col = 'red',
      lwd = 2,
      ylim=c(2500, 5000))
