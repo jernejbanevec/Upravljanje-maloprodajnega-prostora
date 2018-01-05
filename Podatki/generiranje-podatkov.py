@@ -13,7 +13,7 @@ def generiraj_podatke(N = 2 + round(8 * round(rd.uniform(0, 1), 2))):
     c = []
     U = round(rd.uniform(0, 1), 2)
     M = N
-    C = (3 + 20 * U) * M
+    C = (5 + 30 * U) * M
 
     for i in range(0, M):
         U = round(rd.uniform(0, 1), 2)
@@ -36,9 +36,9 @@ def generiraj_podatke(N = 2 + round(8 * round(rd.uniform(0, 1), 2))):
         v.append(round(v2 + (U - 0.5)* delta_v,3))
 
         U = round(rd.uniform(0, 1), 2)
-        k2 = 3 + 7 * U
+        k2 = 30 + 70 * U
         U = round(rd.uniform(0, 1), 2)
-        delta_k = 5 * U
+        delta_k = 50 * U
         U = round(rd.uniform(0, 1), 2)
         k.append(round(k2 + (U - 0.5)* delta_k,3))
         U = round(rd.uniform(0, 1), 2)
@@ -69,7 +69,7 @@ def primerjava_povprecij(N):
     for j in range(2, N+1):
         ds = []
         ss = []
-        for i in range(50):
+        for i in range(150):
             x = generiraj_podatke(j)
             ds.append(dodeljen_prostor(x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7])[0])
             ss.append(strategija_skupnega_prostora(x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7])[0])
@@ -83,9 +83,9 @@ def primerjava_porabe_protora(N):
     for i in range(11):
         ds = []
         ss = []
-        for j in range(100):
+        for j in range(150):
             x = generiraj_podatke(N)
-            C = (5 + 30 * 0.1 * i) * N
+            C = (3 + 20 * 0.1 * i) * N
             ds.append(dodeljen_prostor(x[0], x[1], x[2], x[3], C, x[5], x[6], x[7])[0])
             ss.append(strategija_skupnega_prostora(x[0], x[1], x[2], x[3], C, x[5], x[6], x[7])[0])
         povprecje_ds.append(mean(ds))

@@ -40,11 +40,16 @@ def resi_CRSP(v, s, c, T, beta, theta):
     vrednost = pulp.value(CRSP.objective)
     return (vrednost, vrni_tau(tau, asa1))
 
+def naredi_tau(M):
+    tau = []
+    for i in range(M):
+        tau.append(i/M)
+    return tau
 
 def iz_tau_t(tau, T):
     # Funkcija, ki zlozi matriko t iz vektorja tau
     n = len(tau)
-    t = [[T for x in range(n)] for y in range(n)]
+    t = [[0 for x in range(n)] for y in range(n)]
     for i in range(n):
         for j in range(i):
             t[i][j] = T + tau[j] - tau[i]
@@ -98,7 +103,7 @@ def strategija_skupnega_prostora(d, v, k, theta, C, c, w, H, koraki_max=100, oko
         # reši f(s), povsod so zamaknjeni indeksi za 1 v levo
         delitelj = 0
         beta = 0
-        for i in range(len(d)):
+        for i in range(velikost_t):
             beta_i = s[i] * c[i]
             koef = 0
             for j in range(i+1):
@@ -113,7 +118,8 @@ def strategija_skupnega_prostora(d, v, k, theta, C, c, w, H, koraki_max=100, oko
         T = min(math.sqrt(np.dot(k, y) / np.dot(H, s)), C / beta)
 
         # iz CRSP poiščemo optimalen t, za dane T, y in s
-        (vrednost_f, opt_tau) = resi_CRSP(v, s, c, T, beta, theta)
+        #(vrednost_f, opt_tau) = resi_CRSP(v, s, c, T, beta, theta)
+        opt_tau = naredi_tau(velikost_t)
         t = iz_tau_t(opt_tau, T)
 
         # iz CAPP poiščemo optimalen s, za dane T, t
@@ -121,7 +127,7 @@ def strategija_skupnega_prostora(d, v, k, theta, C, c, w, H, koraki_max=100, oko
 
         delitelj = 0
         beta = 0
-        for i in range(len(d)):
+        for i in range(velikost_t):
             beta_i = s[i] * c[i]
             koef = 0
             for j in range(i+1):
@@ -146,7 +152,7 @@ def strategija_skupnega_prostora(d, v, k, theta, C, c, w, H, koraki_max=100, oko
     Q = []
     for i in range(len(s)):
         Q.append(s[i]*T)
-    return vrednost_skupni, s, T, koraki, Q, opt_tau
+    return vrednost_skupni, koraki, s, T, Q, t
 
 
 #strategija_skupnega_prostora([86.8, 185.632] , [18.781, 19.325] , [0.051, 0.048] , [0.521, 0.188] , 18.4 , [0.094, 0.068] , [[1, 0.99], [0.99, 1]] , [0.096, 0.047])

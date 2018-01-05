@@ -135,20 +135,19 @@ $[8] - [13]$
 \vspace*{3 mm}
 
 Z nekaj zvitimi prijemi ta problem poenostavimo: Definiramo $B$, ki predstavlja velikost prostora pri dani izbiri izdelkov v ponudbi in urniku polnjenja zalog, ter $\beta$, ki je enaka $\frac{B}{T}$ in glede na podani $s$ dobimo formuli za izračun optimalnega $T$: 
-$T^{*} (s) = min\{\sqrt{\frac{k' y}{H' s}}, \frac{C}{\beta(s)}  \}$, kjer optimalni $\beta^*  (s) = \sum_{i \in \mathcal{P}} (s_i c_i \cdot \sum_{j = 1}^{i} s_j c_j) \sum_{i \in \mathcal{P}} s_i c_i $.
+$T^{*} (s) = min\{\sqrt{\frac{k' y}{H' s}}, \frac{C}{\beta(s)}  \}$, kjer optimalni $\beta^*  (s) = \sum_{i \in \mathcal{P}} (s_i c_i \cdot \sum_{j = 1}^{i} s_j c_j) \sum_{i \in \mathcal{P}} s_i c_i $. Ker pa je tudi s prej podanimi poenostavitvami problem še vedno dokaj zahteven, sva se odločila, da uporabiva predpostavko za $t$. V najinem primeru $t$ ne bo rezultat optimizacije funkcije $f$, ampak bo podan vnaprej: $t_i = \frac{i}{M}\cdot T$. Predpostavka nam določa urnik polnjenja polic; optimalnen cikel $T$ sva razdelila na $M$ enakomernih delov. 
 
 \vspace*{1 mm}
 Če imamo vrednosti, pri katerih prvotni optimizacijski problem doseže maksimalno vrednost $v ^ *$, potem to vrednost dosežeta tudi oba podproblema. Če obnovimo, smo začetni optimizacijski problem razdelili na dva podproblema, kjer rešitev enega predstavlja vhodni podatek za drugega. To je tudi ideja za algoritem strategije skupnega prostora.
 
 \begin{enumerate}
 \item $k = 0, s^k = d, t^k = 0, T^k = 0$ in postavimo zaustavitveni kriterij $L$, ki predstavlja spodnjo mejo, maksimalno število korakov $S$, ter $\epsilon > 0$.
-\item $k = k+1$ in rešimo $f(s ^{k-1})$ in dobimo $T^k$ in $t^k$ .
+\item $k = k+1$ in izračunamo  $\beta^k$ , $T^k$ in $t^k$ .
 \item Rešimo $g(T^k, t^k)$ in dobimo $s^k$.
 \item Če je $L  + \epsilon> f(s^k)$ ali  presežemo maksimalno število korakov ($k > S$), potem končamo.
 \item $L = f(s^k)$ in se vrnemo na prvi korak.
 \end{enumerate}
 
-\pagebreak
 \section{Strategija dodeljenega prostora}
 
 Če je prostor dodeljen vsakemu produktu, je dopolnjevanje zalog enostavnejše in ne potrebujemo usklajevati urnika polnjenja zalog in skupnega časa cikla dopolnjevanja zalog na policah. Torej vsak produkt ima svoj cikel. Namesto pogoja $[13]$ definiramo drugačen pogoj, ki nam zagotavlja prostor na policah: $[14]\hspace*{1 mm} \sum_{i \in \mathcal{P}} (1 + \theta_i) c_i s_i T_i \leq C$. Sledi, da je problem pri strategiji dodeljenega prostora naslednji:
@@ -169,11 +168,6 @@ Ideja algoritma strategije dodeljenega prostora:
 \item Rešimo DSS s podanim $T^k$ da dobimo $s^k$; če $s$ konvergira, potem je $s^k$ rešitev, drugače gremo na korak $2$.
 \end{enumerate}
 
-<<<<<<< HEAD
-([2252.311818408007, 3143.1831609044366, 4280.116962968127, 5541.585444746526, 6501.973186455406, 7530.25347214121, 8754.290465617662, 9786.694783226574, 10856.17098199368], [2345.602636111844, 3207.5533302456315, 4256.5370910694555, 5199.690682474628, 5812.365118850423, 6896.47033920601, 7296.699005079152, 7921.030172898909, 8550.78511195774])
-
-([4479.623745426181, 4400.655447289399, 4220.196508734808, 4450.160053869553, 4497.607949806566, 4074.4941779577302, 4141.5765760799295, 4410.311184662159, 4408.3146147519155, 4358.7662140877665, 4270.6329077838], [3269.550976759267, 3767.877518091663, 3833.1889714146832, 4271.391783013575, 4524.03584973299, 4211.05110540659, 4272.952835126323, 4606.627202979208, 4598.773459930919, 4553.839625801792, 4478.4311296320975])
-=======
 \section{Generiranje podatkov}
 
 
@@ -185,8 +179,8 @@ Vzela sva širok nabor parametrov, ki so večinoma povzeti po viru. Vsak paramet
 	\hline
   $C$ & $(5 + 30 U) \cdot M$ & $ \Delta_v $ & $8 U$\\
   $CV_i$ & $U \cdot CV_B$ & $k_i$ & $\bar{k} + (U - 0.5) \Delta_k$\\
-  $CV_B$ & $1 + 9 U$ & $ \bar{k}$ & $0.03 + 0.07 U$\\
-  $\theta_i$ & $ 1.65 \cdot CV_i$ & $ \Delta_k$ & $0.05 U$\\
+  $CV_B$ & $1 + 9 U$ & $ \bar{k}$ & $30 + 70 U$\\
+  $\theta_i$ & $ 1.65 \cdot CV_i$ & $ \Delta_k$ & $50 U$\\
   $d_i$ & $\bar{d} + (U - 0.5) \Delta_d$ & $ c_i$ & $\bar{c} + (U - 0.5) \Delta_c$\\
   $\bar{d}$ & $50 + 100 U$ & $\bar{c}$ & $ 0.05 + 0.1 U$\\
   $\Delta_d$ & $80 U$ & $\Delta_c$ & $0.09 U$\\
@@ -208,6 +202,5 @@ Vzela sva širok nabor parametrov, ki so večinoma povzeti po viru. Vsak paramet
 \begin{enumerate}
 \item Zhang W. , Rajaram K. 2017. Managing limited retail space for basic products: Space sharing vs. space dedication. \textit{European Journal of Operational Research}. 263, 768 - 781
 \end{enumerate}
->>>>>>> c3ea4d1c834e7e7e64a6c64eee7e22484fdf10ec
 
 \end{document}
