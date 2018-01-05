@@ -1,25 +1,7 @@
 #strategija skupnega prostora
 
-def SC(i, tau1, j, theta1, c, s):
-    if i == j:
-        resitev = c[i] * s[i] * (1 + theta1[i])
-    elif i > j:
-        resitev = c[i] * s[i] * (tau1[i] - tau1[j] + theta1[i])
-    else:
-        resitev = c[i] * s[i] * (tau1[i] - tau1[j] + 1 + theta1[i])
-    return resitev
-
-
-def vrni_tau(s, s_vrednosti):
-    # Funkcija, ki zlozi narobe sestavljen tau (tau0 tau1 tau10 tau2 ...) v prav vrstni red
-    n1 = len(s)
-    if n1 <= 10:
-        return s_vrednosti[0: (n1)]
-    else:
-        return s_vrednosti[0:3] + s_vrednosti[(n1 - 10 + 2):(n1)] + s_vrednosti[3:(n1 - 10 + 2)]
-
-
 def naredi_tau(M):
+    # Funkcija, ki razdeli normiran vektor na M enakih delov
     tau = []
     for i in range(M):
         tau.append(i/M)
@@ -80,6 +62,7 @@ def strategija_skupnega_prostora(d, v, k, theta, C, c, w, H, koraki_max=100, oko
                 y.append(0)
 
         # reši f(s), povsod so zamaknjeni indeksi za 1 v levo
+        
         delitelj = 0
         beta = 0
         for i in range(velikost_t):
@@ -97,12 +80,13 @@ def strategija_skupnega_prostora(d, v, k, theta, C, c, w, H, koraki_max=100, oko
         T = min(math.sqrt(np.dot(k, y) / np.dot(H, s)), C / beta)
 
         # iz CRSP poiščemo optimalen t, za dane T, y in s
-        opt_tau = naredi_tau(velikost_t)
-        t = iz_tau_t(opt_tau, T)
+        opt_tau = naredi_tau(velikost_t) #poračunamo tau glede na najino predpostavko
+        t = iz_tau_t(opt_tau, T)  #iz optimalnega tau napravimo matirko t
 
         # iz CAPP poiščemo optimalen s, za dane T, t
         (vrednost_g, s) = resi_CAPP(d, v, t, T, H, k, C, c, w, theta)
 
+        # poračunamo nov optimalen T
         delitelj = 0
         beta = 0
         for i in range(velikost_t):
@@ -117,12 +101,13 @@ def strategija_skupnega_prostora(d, v, k, theta, C, c, w, H, koraki_max=100, oko
 
         T = min(math.sqrt(np.dot(k, y) / np.dot(H, s)), C / beta)
 
+        # poračunamo novo vrednost opt. problema
         vrednost_f_meja = np.dot(v, s) - T * np.dot(H, s) - (1 / T) * np.dot(k, y)
 
-        if vrednost_f_meja < spodnja_meja + gamma:
+        if vrednost_f_meja < spodnja_meja + gamma: # če začne vrednost opt problema padati se ustavi in vrne staro (najvišjo) vrednost
             break
         else:
-            spodnja_meja = vrednost_f_meja
+            spodnja_meja = vrednost_f_meja #  sicer spremeni prejšno največjo vrednost, da takoj opazimo ali vrednost opt. problema pada
             koraki += 1
 
     # poračunam vrednost pri "Capacitated problem with independent replenishments
@@ -130,5 +115,5 @@ def strategija_skupnega_prostora(d, v, k, theta, C, c, w, H, koraki_max=100, oko
     Q = []
     for i in range(len(s)):
         Q.append(s[i]*T)
-    return vrednost_skupni, y, T, Q, opt_tau
+    return vrednost_skupni, y, T, Q, opt_tau # program vrne vse odločevalne spremenljivke
 
