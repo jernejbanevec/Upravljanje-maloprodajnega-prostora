@@ -19,10 +19,10 @@ def vrni_tau(s, s_vrednosti):
         return s_vrednosti[0:3] + s_vrednosti[(n1 - 10 + 2):(n1)] + s_vrednosti[3:(n1 - 10 + 2)]
 
 
-def naredi_tau(M):
+def naredi_tau(M, T):
     tau = []
     for i in range(M):
-        tau.append(i/M)
+        tau.append(i/M*T)
     return tau
 
 
@@ -62,13 +62,14 @@ def resi_CAPP(d, v, t, T, H, k, C, c, w, theta):
 
 # algoritem strategije skupnega prostora
 
-def strategija_skupnega_prostora(d, v, k, theta, C, c, w, H, koraki_max=100, okolica=0.01):
+def strategija_skupnega_prostora(d, v, k, theta, C, c, w, koraki_max=100, okolica=0.01):
     koraki = 1  # števec korakov
     s = d  # začetna vrednost za končno efektivno stopnjo povpraševanja
     velikost_t = len(d)
     spodnja_meja = 0
     gamma = okolica  # dovoljena okolica
     S = koraki_max  # največje število korakov
+    H = [a * (0.5 + b) for a, b in zip(c, theta)]
 
     while koraki < S:
 
@@ -97,7 +98,7 @@ def strategija_skupnega_prostora(d, v, k, theta, C, c, w, H, koraki_max=100, oko
         T = min(math.sqrt(np.dot(k, y) / np.dot(H, s)), C / beta)
 
         # iz CRSP poiščemo optimalen t, za dane T, y in s
-        opt_tau = naredi_tau(velikost_t)
+        opt_tau = naredi_tau(velikost_t, T)
         t = iz_tau_t(opt_tau, T)
 
         # iz CAPP poiščemo optimalen s, za dane T, t

@@ -54,10 +54,11 @@ def resi_DSS(d, v, k, theta, C, c, w, H, T):
     return (pulp.value(DSS.objective), s)
 
 
-def dodeljen_prostor(d,v,k,theta,C,c,w,H,eps=0.01):
+def dodeljen_prostor(d,v,k,theta,C,c,w,eps=0.01):
     #Funkcija reši problem strategije dodeljenega prostora
     #(za dane paodatke nam poda največji dobiček, katere izdelke vključiti v ponudbo, čas cikla polnjenja izdelkov in količino izdelkov ob posameznem polnjenju
     n = len(d) #število izdelkov
+    H = [a * (0.5 + b) for a, b in zip(c, theta)]
     s = d[:]
     y = []
     for i in s:
@@ -76,5 +77,6 @@ def dodeljen_prostor(d,v,k,theta,C,c,w,H,eps=0.01):
     Q = []
     for i in range(n): #izračunamo Q
         Q.append(s[i]*T[i])
-    return (dobicek, y, T, Q)
+    return (dobicek, y, T, Q, l)
 
+#dodeljen_prostor([64.184, 113.0], [10.538, 13.247], [90.9, 74.14], [0.165, 5.833], 48.4, [0.105, 0.122], [[1, 0.484], [0.261, 1]])

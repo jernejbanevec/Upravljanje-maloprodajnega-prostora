@@ -51,7 +51,7 @@ def generiraj_podatke(N = 2 + round(13 * round(rd.uniform(0, 1), 2))):
     w = [[round(rd.uniform(0, (1/M)), 3) for i in range(M)] for j in range(M)] #matrika substitucije (zaokroženo na 3 decimalke, da je predstavljivo)
     for i in range(M):
         w[i][i] = 1
-    return list((d,v,k,theta,C,c,w,H))
+    return list((d,v,k,theta,C,c,w))
 
 
 def mean(numbers):
@@ -65,10 +65,10 @@ def primerjava_povprecij(N):
     for j in range(2, N+1):
         ds = []
         ss = []
-        for i in range(150):
+        for i in range(10):
             x = generiraj_podatke(j)
-            ds.append(dodeljen_prostor(x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7])[0])
-            ss.append(strategija_skupnega_prostora(x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7])[0])
+            ds.append(dodeljen_prostor(x[0], x[1], x[2], x[3], x[4], x[5], x[6])[0])
+            ss.append(strategija_skupnega_prostora(x[0], x[1], x[2], x[3], x[4], x[5], x[6])[0])
         povprecje_ds.append(mean(ds))
         povprecje_ss.append(mean(ss))
     return povprecje_ds, povprecje_ss
@@ -83,8 +83,8 @@ def primerjava_porabe_protora(N):
         for j in range(150):
             x = generiraj_podatke(N)
             C = (3 + 20 * 0.1 * i) * N
-            ds.append(dodeljen_prostor(x[0], x[1], x[2], x[3], C, x[5], x[6], x[7])[0])
-            ss.append(strategija_skupnega_prostora(x[0], x[1], x[2], x[3], C, x[5], x[6], x[7])[0])
+            ds.append(dodeljen_prostor(x[0], x[1], x[2], x[3], C, x[5], x[6])[0])
+            ss.append(strategija_skupnega_prostora(x[0], x[1], x[2], x[3], C, x[5], x[6])[0])
         povprecje_ds.append(mean(ds))
         povprecje_ss.append(mean(ss))
     return povprecje_ds, povprecje_ss
