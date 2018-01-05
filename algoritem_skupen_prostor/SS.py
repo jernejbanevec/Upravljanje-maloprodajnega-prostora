@@ -1,6 +1,5 @@
 #strategija skupnega prostora
 
-<<<<<<< HEAD
 def SC(i, tau1, j, theta1, c, s):
     if i == j:
         resitev = c[i] * s[i] * (1 + theta1[i])
@@ -21,10 +20,7 @@ def vrni_tau(s, s_vrednosti):
 
 
 def naredi_tau(M, T):
-=======
-def naredi_tau(M):
     # Funkcija, ki razdeli normiran vektor na M enakih delov
->>>>>>> 56d7b195b89b3bd3e643b4653bcfbbd7fdf03608
     tau = []
     for i in range(M):
         tau.append(i/M*T)
@@ -104,13 +100,8 @@ def strategija_skupnega_prostora(d, v, k, theta, C, c, w, koraki_max=100, okolic
         T = min(math.sqrt(np.dot(k, y) / np.dot(H, s)), C / beta)
 
         # iz CRSP poiščemo optimalen t, za dane T, y in s
-<<<<<<< HEAD
-        opt_tau = naredi_tau(velikost_t, T)
-        t = iz_tau_t(opt_tau, T)
-=======
-        opt_tau = naredi_tau(velikost_t) #poračunamo tau glede na najino predpostavko
+        opt_tau = naredi_tau(velikost_t, T) #poračunamo tau glede na najino predpostavko
         t = iz_tau_t(opt_tau, T)  #iz optimalnega tau napravimo matirko t
->>>>>>> 56d7b195b89b3bd3e643b4653bcfbbd7fdf03608
 
         # iz CAPP poiščemo optimalen s, za dane T, t
         (vrednost_g, s) = resi_CAPP(d, v, t, T, H, k, C, c, w, theta)

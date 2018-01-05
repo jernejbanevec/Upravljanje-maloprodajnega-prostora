@@ -135,7 +135,7 @@ $[8] - [13]$
 \vspace*{3 mm}
 
 Z nekaj zvitimi prijemi ta problem poenostavimo: Definiramo $B$, ki predstavlja velikost prostora pri dani izbiri izdelkov v ponudbi in urniku polnjenja zalog, ter $\beta$, ki je enaka $\frac{B}{T}$ in glede na podani $s$ dobimo formuli za izračun optimalnega $T$: 
-$T^{*} (s) = min\{\sqrt{\frac{k' y}{H' s}}, \frac{C}{\beta(s)}  \}$, kjer optimalni $\beta^*  (s) = \sum_{i \in \mathcal{P}} (s_i c_i \cdot \sum_{j = 1}^{i} s_j c_j) \sum_{i \in \mathcal{P}} s_i c_i $. Ker pa je tudi s prej podanimi poenostavitvami problem še vedno dokaj zahteven, sva se odločila, da uporabiva predpostavko za $t$. V najinem primeru $t$ ne bo rezultat optimizacije funkcije $f$, ampak bo podan vnaprej: $t_i = \frac{i}{M}\cdot T$. Predpostavka nam določa urnik polnjenja polic; optimalnen cikel $T$ sva razdelila na $M$ enakomernih delov. 
+$T^{*} (s) = min\{\sqrt{\frac{k' y}{H' s}}, \frac{C}{\beta(s)}  \}$, kjer optimalni $\beta^*  (s) = \sum_{i \in \mathcal{P}} (s_i c_i \cdot \sum_{j = 1}^{i} s_j c_j) \sum_{i \in \mathcal{P}} s_i c_i $. Ker pa je tudi s prej podanimi poenostavitvami problem še vedno dokaj zahteven, sva se odločila, da uporabiva predpostavko za $\tau$. V najinem primeru $\tau$ ne bo rezultat optimizacije funkcije $f$, ampak bo podan vnaprej: $\tau_i = \frac{i}{M}\cdot T$. Predpostavka nam določa urnik polnjenja polic; optimalnen cikel $T$ sva razdelila na $M$ enakomernih delov. 
 
 \vspace*{1 mm}
 Če imamo vrednosti, pri katerih prvotni optimizacijski problem doseže maksimalno vrednost $v ^ *$, potem to vrednost dosežeta tudi oba podproblema. Če obnovimo, smo začetni optimizacijski problem razdelili na dva podproblema, kjer rešitev enega predstavlja vhodni podatek za drugega. To je tudi ideja za algoritem strategije skupnega prostora.
@@ -148,6 +148,7 @@ $T^{*} (s) = min\{\sqrt{\frac{k' y}{H' s}}, \frac{C}{\beta(s)}  \}$, kjer optima
 \item $L = f(s^k)$ in se vrnemo na prvi korak.
 \end{enumerate}
 
+\pagebreak
 \section{Strategija dodeljenega prostora}
 
 Če je prostor dodeljen vsakemu produktu, je dopolnjevanje zalog enostavnejše in ne potrebujemo usklajevati urnika polnjenja zalog in skupnega časa cikla dopolnjevanja zalog na policah. Torej vsak produkt ima svoj cikel. Namesto pogoja $[13]$ definiramo drugačen pogoj, ki nam zagotavlja prostor na policah: $[14]\hspace*{1 mm} \sum_{i \in \mathcal{P}} (1 + \theta_i) c_i s_i T_i \leq C$. Sledi, da je problem pri strategiji dodeljenega prostora naslednji:
@@ -184,11 +185,12 @@ Vzela sva širok nabor parametrov, ki so večinoma povzeti po viru. Vsak paramet
   $d_i$ & $\bar{d} + (U - 0.5) \Delta_d$ & $ c_i$ & $\bar{c} + (U - 0.5) \Delta_c$\\
   $\bar{d}$ & $50 + 100 U$ & $\bar{c}$ & $ 0.05 + 0.1 U$\\
   $\Delta_d$ & $80 U$ & $\Delta_c$ & $0.09 U$\\
-  $ v_i$ & $\bar{v} + (U - 0.5) \Delta_v$ & $H_i$ & $ c_i \cdot (\frac{1}{2} + \theta_i)$\\
+  $ v_i$ & $\bar{v} + (U - 0.5) \Delta_v$ & $h_i$ & $ c_i$\\
   $ \bar{v}$ & $ 5 + 10 U$ & &\\
 	\hline
 \end{tabular}
 
+\pagebreak
 
 \section{Analiza}
 
@@ -208,7 +210,7 @@ Opazimo, da dobiček pri obeh strategijah narašča s številom izdelkov, kar je
 Podatke sva primerjala tudi v odvisnosti od celotnega prostora, ki ga imamo na voljo. Tu sva pričakovala, da se bo pri manjšem prostoru bolje izkazala strategija skupnega prostora, saj je pri njej prostor bolje izkoriščen kot pri strategiji dodeljenega prostora. V tem eksperimentu sva poračunala dobiček obeh strategij, kjer smo v ponudbo vključili 5 izdelkov. Za vsako možno količino prostora $C \in \{20.0, 32.0, 44.0, 56.0, 68.0, 80.0, 92.0, 104.0, 116.0, 128.0, 140.0\}$, sva generirala 300 naključnih problemov in kot prej izračunala aritmetično sredino. Rezultat je predstavljen na spodnjem grafu:
 
 \begin{figure}[ht]
-\includegraphics [scale = 0.6]{primerjava-strategij-kolicina-prostora}
+\includegraphics [scale = 0.68]{primerjava-strategij-kolicina-prostora}
 \caption{Graf, ki prikazuje primerjavo dobička za obe strategiji v odvisnosti od prostora, ki ga imamo na razpolago, pri predpostavki, da ima v ponudbo vključenih 5 izdelkov.}
 \end{figure}
 
